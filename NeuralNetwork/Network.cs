@@ -1,12 +1,17 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace NeuralNetwork
 {
     public class Network
     {
+        
         private static double[] x = FillRandomly(InputsCount); //new double[InputsCount]{1, 2};
-        static  double[] expectedY = new double[thirdLayerNeuronsCount] {0.5, 0.6, 0.1};
+
+        private static double[] expectedY = new double[thirdLayerNeuronsCount] {1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        // private static double[] x = //new double[InputsCount]; //FillRandomly(InputsCount); //new double[InputsCount]{1, 2};
+        // private static double[] expectedY = //new double[thirdLayerNeuronsCount];//{} {0.5, 0.6, 0.1};
 
         //inputs
         private const int InputsCount = 784;
@@ -14,7 +19,7 @@ namespace NeuralNetwork
         //neurons
         private const int firstLayerNeuronsCount = 16;
         private const int secondLayerNeuronsCount = 8;
-        private const int thirdLayerNeuronsCount = 3;
+        private const int thirdLayerNeuronsCount = 10;
 
 
         private static double[,] w1 = FillRandomly(firstLayerNeuronsCount, InputsCount);
@@ -33,12 +38,18 @@ namespace NeuralNetwork
         private static double[] y = new double[thirdLayerNeuronsCount];
 
 
+
+        public void Init(List<NeuronInputImage> images)
+        {
+        }
+
+
         public void Train()
         {
             double loss = Double.PositiveInfinity;
-            var accuracy = 0.0001;
+            var accuracy = 0.001;
             var i = 0;
-            var maxIter = 50000;
+            var maxIter = 1000000;
             Forward();
             while (Math.Abs(loss) > accuracy &&  i < maxIter)
             {
@@ -58,10 +69,10 @@ namespace NeuralNetwork
             double sum = 0;
             for(int i = 0; i < expectedOutput.Length; i ++)
             {
-                sum += (expectedOutput[i] - prediction[i]);
+                sum += Math.Abs(expectedOutput[i] - prediction[i]);
             }
 
-            return sum /*/ expectedOutput.Length*/;
+            return sum / expectedOutput.Length;
         }
 
         private static double[,] FillRandomly(int rowCount, int colCount)
@@ -106,7 +117,7 @@ namespace NeuralNetwork
             ThirdLayerForward();
             ThirdLayerActivation();
             
-            return  string.Join(" , ", y);
+            return  string.Join(" , ", y.Select(z => string.Format("{0:f2}", z)));
         }
 
         private static void FirstLayerForward()
@@ -166,7 +177,26 @@ namespace NeuralNetwork
 
         private static void ThirdLayerActivation()
         {
-             y = vOut.Select(ActivationFunc).ToArray();
+             y = vOut.Select(val => ActivationSoftMax(val, vOut)).ToArray();
+        }
+
+
+        private static double ActivationSoftMax(double val, double[] allLayer)
+        {
+            double sum = 0; 
+            for (int i = 0; i < allLayer.Length; i++)
+            {
+                sum += Math.Pow(Math.E, allLayer[i]);
+            }
+
+            return Math.Pow(Math.E, val) / sum;
+        }
+
+        private static double ActivationSoftMaxDerivative(double val, double[] allLayer)
+        {
+            var softMax = ActivationSoftMax(val, allLayer);
+
+            return softMax * (1 - softMax);
         }
         
         //RELU
@@ -214,7 +244,7 @@ namespace NeuralNetwork
             double[] deltas = new double[errors.Length];
             for (int i = 0; i < errors.Length; i++)
             {
-                deltas[i] = errors[i] * ActivationDerivative(prediction[i]);
+                deltas[i] = errors[i] * ActivationSoftMaxDerivative(prediction[i], prediction);
             }
 
             return deltas;

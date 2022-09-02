@@ -1,5 +1,5 @@
 ﻿using System;
-using System.IO;
+using System.Linq;
 using Accord.DataSets;
 using NeuralNetwork.ImageProcessing;
 
@@ -9,9 +9,11 @@ namespace NeuralNetwork
     {
     static void Main(string[] args)
     {
-        var images = MnistProcessor.ImageDtos();
-        
-        Console.WriteLine(images[0].ToString());
+  //      var images = MnistProcessor.ImageDtos();
+
+//        var inputImages = images.Select(NeuronInputImage.FromDigitImage).ToList();
+        var net = new Network();
+        net.Train();
     }
 
 
