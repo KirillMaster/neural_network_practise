@@ -17,8 +17,8 @@ namespace NeuralNetwork
 
        
         
-        //net.Train(inputImages);
-        net.TrainTest();
+             net.Train(inputImages);
+       //net.TrainTest();
     }
 
 

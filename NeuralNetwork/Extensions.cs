@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace NeuralNetwork
 {
     static class RandomExtensions
     {
-        public static void Shuffle<T> (T[] array)
+        public static List<T> Shuffle<T> (T[] array)
         {
             var random = new Random();
             int n = array.Length;
@@ -15,6 +17,8 @@ namespace NeuralNetwork
                 array[n] = array[k];
                 array[k] = temp;
             }
+
+            return array.ToList();
         }
     }
 }

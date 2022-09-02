@@ -10,14 +10,14 @@ namespace NeuralNetwork
         
         private static double[] x = FillRandomly(InputsCount); //new double[InputsCount]{1, 2};
 
-        private static double[] expectedY = new double[thirdLayerNeuronsCount] {0.1, 0, 0, 0.5, 0, 0, 0, 0, 0, 0.4};
+        private static double[] expectedY = new double[thirdLayerNeuronsCount] {0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
 
         //inputs
         private const int InputsCount = 784;
         
         //neurons
         private const int firstLayerNeuronsCount = 128;
-        private const int secondLayerNeuronsCount = 10;
+        private const int secondLayerNeuronsCount = 8;
         private const int thirdLayerNeuronsCount = 10;
 
 
@@ -31,7 +31,7 @@ namespace NeuralNetwork
         private static double[] bias3 = FillRandomly(thirdLayerNeuronsCount);
       
 
-        private static double lambda = 0.01;
+        private static double lambda = 0.1;
 
 
         private static double[] v1 = new double[firstLayerNeuronsCount];
@@ -45,26 +45,28 @@ namespace NeuralNetwork
 
         public void Train(List<NeuronInputImage> images)
         {
-            RandomExtensions.Shuffle(images.ToArray());
+            images =  RandomExtensions.Shuffle(images.ToArray());
             
             
-            var imagesCount = 10000;
+            var imagesCount = 10;
             double loss = Double.PositiveInfinity;
             var accuracy = 0.001;
             var i = 0;
             var maxIter = 1000000;
-
-            foreach (var image in images.Take(imagesCount).Where(x => x.Value == 7  || x.Value == 2))
-            {
-                x = image.NormalizedBytes;
-                expectedY = image.VectorizedLabel;
-                Forward();
-                Backward(y);
-                loss = Loss(expectedY, y);
-                Console.WriteLine($"Loss:           {loss}");
-                Console.WriteLine($"Forward: {Forward()}");
+            
+            for(int k = 0; k < 1000; k ++ ){
+                foreach (var image in images.Take(imagesCount))
+                {
+                    x = image.NormalizedBytes;
+                    expectedY = image.VectorizedLabel;
+                    Forward();
+                    loss = Backward(y);
+                    Console.WriteLine($"Loss:           {loss}");
+                    // Console.WriteLine($"Forward: {Forward()}");
+                }
             }
             
+            Console.WriteLine($"Loss:           {loss}");
             var random = new Random().Next(0, imagesCount-1);
             Console.WriteLine($"Test: {images[random].Value}");
             Console.WriteLine("Prediction: ");
@@ -113,10 +115,11 @@ namespace NeuralNetwork
            
                 loss = Loss(expectedY, y);
                 Console.WriteLine($"ForwardResult : {Forward()}");
+                Console.WriteLine($"Loss:           {loss}");
                 i++;
             }
  
-            Console.WriteLine($"Loss:           {loss}");
+
             Console.WriteLine($"Iterations: {i}");
         }
         
@@ -161,7 +164,7 @@ namespace NeuralNetwork
         
         private static double GetRandomWeight(Random random)
         {
-            return random.NextDouble() * (random.Next(0, 1) == 0 ? 1 : -1);
+            return random.NextDouble() * (random.Next(0, 1) == 0 ? 1 : -1) * 0.01;
         }
 
         public static string Forward()
@@ -274,13 +277,41 @@ namespace NeuralNetwork
 
 
 
-        private static void Backward(double[] prediction)
+        private static double Backward(double[] prediction)
         {
-            var e =  OutputErrors(prediction);
+           // var e =  OutputErrors(prediction);
+            var e = OutputErrors(prediction);
             var deltas = OutputDeltas(e, prediction);
             var secondLayerDeltas = ModifyThirdLayerWeights(deltas);
             ModifySecondLayerWeights(secondLayerDeltas);
             ModifyFirstLayerWeights(secondLayerDeltas);
+
+            return TotalError(e);
+        }
+
+
+        private static double TotalError(double[] errors)
+        {
+            double sum = 0;
+            for (int i = 0; i < errors.Length; i++)
+            {
+                sum += Math.Abs(errors[i]);
+            }
+
+            return sum;
+        }
+
+
+        private static double[] CrossEntropyErrors(double[] prediction)
+        {
+            double[] errors = new double[prediction.Length];
+            
+            for (int i = 0; i < prediction.Length; i++)
+            {
+                errors[i] = -1 * expectedY[i] * Math.Log(prediction[i]);
+            }
+
+            return errors;
         }
 
 
