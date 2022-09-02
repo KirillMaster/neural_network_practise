@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Accord.Math;
 
 namespace NeuralNetwork
 {
@@ -9,22 +10,25 @@ namespace NeuralNetwork
         
         private static double[] x = FillRandomly(InputsCount); //new double[InputsCount]{1, 2};
 
-        private static double[] expectedY = new double[thirdLayerNeuronsCount] {1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        // private static double[] x = //new double[InputsCount]; //FillRandomly(InputsCount); //new double[InputsCount]{1, 2};
-        // private static double[] expectedY = //new double[thirdLayerNeuronsCount];//{} {0.5, 0.6, 0.1};
+        private static double[] expectedY = new double[thirdLayerNeuronsCount] {0.1, 0, 0, 0.5, 0, 0, 0, 0, 0, 0.4};
 
         //inputs
         private const int InputsCount = 784;
         
         //neurons
-        private const int firstLayerNeuronsCount = 16;
-        private const int secondLayerNeuronsCount = 8;
+        private const int firstLayerNeuronsCount = 128;
+        private const int secondLayerNeuronsCount = 10;
         private const int thirdLayerNeuronsCount = 10;
 
 
         private static double[,] w1 = FillRandomly(firstLayerNeuronsCount, InputsCount);
+        private static double[] bias1 = FillRandomly(firstLayerNeuronsCount);
+        
         private static double[,] w2 = FillRandomly(secondLayerNeuronsCount, firstLayerNeuronsCount);
+        private static double[] bias2 = FillRandomly(secondLayerNeuronsCount);
+        
         private static double[,] w3 = FillRandomly(thirdLayerNeuronsCount, secondLayerNeuronsCount);
+        private static double[] bias3 = FillRandomly(thirdLayerNeuronsCount);
       
 
         private static double lambda = 0.01;
@@ -36,20 +40,72 @@ namespace NeuralNetwork
         private static double[] f2 = new double[secondLayerNeuronsCount];
         private static double[] vOut = new double[thirdLayerNeuronsCount];
         private static double[] y = new double[thirdLayerNeuronsCount];
+        
 
 
-
-        public void Init(List<NeuronInputImage> images)
+        public void Train(List<NeuronInputImage> images)
         {
-        }
-
-
-        public void Train()
-        {
+            RandomExtensions.Shuffle(images.ToArray());
+            
+            
+            var imagesCount = 10000;
             double loss = Double.PositiveInfinity;
             var accuracy = 0.001;
             var i = 0;
             var maxIter = 1000000;
+
+            foreach (var image in images.Take(imagesCount).Where(x => x.Value == 7  || x.Value == 2))
+            {
+                x = image.NormalizedBytes;
+                expectedY = image.VectorizedLabel;
+                Forward();
+                Backward(y);
+                loss = Loss(expectedY, y);
+                Console.WriteLine($"Loss:           {loss}");
+                Console.WriteLine($"Forward: {Forward()}");
+            }
+            
+            var random = new Random().Next(0, imagesCount-1);
+            Console.WriteLine($"Test: {images[random].Value}");
+            Console.WriteLine("Prediction: ");
+            x = images[random].NormalizedBytes;
+            Console.WriteLine(Forward());
+            Console.WriteLine(NeuronInputImage.FromVectorizedLabel(y));
+        }
+        
+        
+        // Forward();
+        // while (Math.Abs(loss) > accuracy &&  i < maxIter)
+        // {
+        //     x = images[0].NormalizedBytes;
+        //     expectedY = images[0].VectorizedLabel;
+        //     
+        //     Backward(y);
+        //
+        //     loss = Loss(expectedY, y);
+        //     Console.WriteLine($"ForwardResult : {Forward()}");
+        //     i++;
+        // }
+        //
+        // Console.WriteLine($"Loss:           {loss}");
+        // Console.WriteLine($"Iterations: {i}");
+        //
+        //
+        // var test = images.Where(x => x.Value == 7).ToList();
+        // var another = test[2];
+        // another = images[5];
+        //
+        //
+        // x = another.NormalizedBytes;
+        // Console.WriteLine(Forward());
+
+
+        public void TrainTest()
+        {
+            double loss = Double.PositiveInfinity;
+            var accuracy = 0.001;
+            var i = 0;
+            var maxIter = 1000;
             Forward();
             while (Math.Abs(loss) > accuracy &&  i < maxIter)
             {
@@ -117,7 +173,7 @@ namespace NeuralNetwork
             ThirdLayerForward();
             ThirdLayerActivation();
             
-            return  string.Join(" , ", y.Select(z => string.Format("{0:f2}", z)));
+            return string.Join(", ", y.Select(z => string.Format("{0:f2}", z)));
         }
 
         private static void FirstLayerForward()
@@ -128,7 +184,7 @@ namespace NeuralNetwork
             {
                 for (int j = 0; j < InputsCount; j++)
                 {
-                    result[i] += x[j] * w1[i,j];
+                    result[i] += x[j] * w1[i,j] + bias1[i];
                 }
             }
 
@@ -147,7 +203,7 @@ namespace NeuralNetwork
             {
                 for (int j = 0; j < firstLayerNeuronsCount; j++)
                 {
-                    result[i] += f1[j] * w2[i,j];
+                    result[i] += f1[j] * w2[i,j] + bias2[i];
                 }
             }
 
@@ -167,7 +223,7 @@ namespace NeuralNetwork
             {
                 for (int j = 0; j < secondLayerNeuronsCount; j++)
                 {
-                    result[i] += f2[j] * w3[i, j];
+                    result[i] += f2[j] * w3[i, j] + bias3[i];
                 }
             }
            
@@ -202,17 +258,17 @@ namespace NeuralNetwork
         //RELU
         private static double ActivationFunc(double val)
         {
-            //return val;
-            //return (Math.Pow(Math.E, val) - Math.Pow(Math.E, -val)) / (Math.Pow(Math.E, val) + Math.Pow(Math.E, -val));
+           // return val;
+           // return (Math.Pow(Math.E, val) - Math.Pow(Math.E, -val)) / (Math.Pow(Math.E, val) + Math.Pow(Math.E, -val));
 
-            return 1 / (1 + Math.Pow(Math.E, -val));
+             return 1 / (1 + Math.Pow(Math.E, -val));
         }
 
         //RELU'
         private static double ActivationDerivative(double val)
         {
             //return 1;
-            //return  1 - val * val;
+           // return  1 - val * val;
              return val * (1 - val);
         }
 
@@ -260,6 +316,7 @@ namespace NeuralNetwork
                 for (int j = 0; j < secondLayerNeuronsCount; j++)
                 {
                     w3[i,j] = w3[i,j] - lambda * lastNeuronDeltas[i] * f2[j];
+                    bias3[i] = bias3[i] - lambda * lastNeuronDeltas[i] * 1;
                 } 
             }
 
@@ -270,10 +327,7 @@ namespace NeuralNetwork
                     secondLayerDeltas[j] = lastNeuronDeltas[i] * w3[i, j] * ActivationDerivative(f2[j]);
                 }
             }
-           
             
-         
-
             return secondLayerDeltas;
         }
 
@@ -284,6 +338,7 @@ namespace NeuralNetwork
                 for (int j = 0; j < firstLayerNeuronsCount; j++)
                 {
                     w2[i,j] = w2[i,j] - lambda * secondLayerDeltas[i] * f1[j];
+                    bias2[i] = bias2[i] - lambda * secondLayerDeltas[i] * 1;
                 }
             }
         }
@@ -309,6 +364,7 @@ namespace NeuralNetwork
                 for (int j = 0; j < InputsCount; j++)
                 {
                     w1[i,j] = w1[i,j] - lambda * firstLayerDeltas[i] * x[j];
+                    bias1[i] = bias1[i] - lambda * firstLayerDeltas[i] * 1;
                 }
             }
         }
