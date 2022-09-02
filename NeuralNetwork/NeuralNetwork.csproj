@@ -5,4 +5,30 @@
         <TargetFramework>net5.0</TargetFramework>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Folder Include="DataSet" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="DataSet\Numbers\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="DataSet\Numbers\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="DataSet\Numbers\**" />
+      <None Update="DataSet\t10k-images.idx3-ubyte">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="DataSet\t10k-labels.idx1-ubyte">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Accord.DataSets" Version="3.8.2-alpha" />
+    </ItemGroup>
+
 </Project>
