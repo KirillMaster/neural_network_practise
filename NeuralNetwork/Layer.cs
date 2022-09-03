@@ -9,7 +9,7 @@ namespace NeuralNetwork
         
         private Func<double, double> ActivationFuncDerivative { get; set; }
         public int NeuronsCount { get; set; }
-        private int PreviousLayerInputsCount { get; set; }
+        private int PreviousLayerOutputsCount { get; set; }
         private double[] PreviousLayerOutputs { get; set; }
         
         private double[] NextLayerDeltas { get; set; }
@@ -19,15 +19,15 @@ namespace NeuralNetwork
         private double[,] w { get; set; } 
         private double[] bias { get; set; } 
 
-        public Layer(Func<double, double> activationFunc, Func<double, double> activationFuncDerivative, int neuronsCount, int previousLayerInputsCount, double lambda)
+        public Layer(Func<double, double> activationFunc, Func<double, double> activationFuncDerivative, int neuronsCount, int previousLayerOutputsCount, double lambda)
         {
             ActivationFunc = activationFunc;
             NeuronsCount = neuronsCount;
-            PreviousLayerInputsCount = previousLayerInputsCount;
+            PreviousLayerOutputsCount = previousLayerOutputsCount;
             Lambda = lambda;
             ActivationFuncDerivative = activationFuncDerivative;
             
-            w = RandomHelper.FillRandomly(previousLayerInputsCount, neuronsCount);
+            w = RandomHelper.FillRandomly(previousLayerOutputsCount, neuronsCount);
             bias = RandomHelper.FillRandomly(neuronsCount);
         }
 
@@ -42,7 +42,7 @@ namespace NeuralNetwork
 
             for (int i = 0; i < NeuronsCount; i++)
             {
-                for (int j = 0; j < PreviousLayerInputsCount; j++)
+                for (int j = 0; j < PreviousLayerOutputsCount; j++)
                 {
                     result[i] += PreviousLayerOutputs[j] * w[j,i] + bias[i];
                 }
@@ -51,25 +51,15 @@ namespace NeuralNetwork
             return Activation(result);
         }
 
-        public void SetPreviousLayerOutputs(double[] previousLayerOutputs)
-        {
-            PreviousLayerOutputs = previousLayerOutputs;
-        }
-
-        public void SetNextLayerDeltas(double[] nextLayerDeltas)
-        {
-            NextLayerDeltas = nextLayerDeltas;
-        }
-
         public double[] Backward()
         {
            ModifyWeights(NextLayerDeltas);
-           return PreviousLayerDeltas(NextLayerDeltas);
+           return Deltas(NextLayerDeltas);
         }
         
         private void ModifyWeights(double[] lastLayerDeltas)
         {
-            for (int i = 0; i < PreviousLayerInputsCount; i++)
+            for (int i = 0; i < PreviousLayerOutputsCount; i++)
             {
                 for (int j = 0; j < NeuronsCount; j++)
                 {
@@ -79,10 +69,10 @@ namespace NeuralNetwork
             }
         }
         
-        private double[] PreviousLayerDeltas(double[] outputDeltas)
+        private double[] Deltas(double[] outputDeltas)
         {
-            double[] previousLayerDeltas = new double[PreviousLayerInputsCount];
-            for (int i = 0; i < PreviousLayerInputsCount; i++)
+            double[] previousLayerDeltas = new double[PreviousLayerOutputsCount];
+            for (int i = 0; i < PreviousLayerOutputsCount; i++)
             {
                 for (int j = 0; j < NeuronsCount; j++)
                 {
@@ -91,6 +81,16 @@ namespace NeuralNetwork
             }
             
             return previousLayerDeltas;
+        }
+        
+        public void SetPreviousLayerOutputs(double[] previousLayerOutputs)
+        {
+            PreviousLayerOutputs = previousLayerOutputs;
+        }
+
+        public void SetNextLayerDeltas(double[] nextLayerDeltas)
+        {
+            NextLayerDeltas = nextLayerDeltas;
         }
     }
 }
