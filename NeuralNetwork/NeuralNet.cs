@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using NeuralNetwork.ImageProcessing;
 
 namespace NeuralNetwork
 {
@@ -29,18 +30,19 @@ namespace NeuralNetwork
         {
             Layers = new List<Layer>();
             var inputsCount = TrainData[0].X.Length;
+            var outputsCount = TrainData[0].ExpectedY.Length;
             
-            var layer1 = new Layer(ActivationFunc, ActivationDerivative, 3, inputsCount, Lambda);
-            var layer2 = new Layer(ActivationFunc, ActivationDerivative, 1, layer1.NeuronsCount, Lambda);
+            var layer1 = new Layer(ActivationFunc, ActivationDerivative, 6, inputsCount, Lambda);
+            var layer2 = new Layer(ActivationFunc, ActivationDerivative, outputsCount, layer1.NeuronsCount, Lambda);
             //var layer3 = new Layer(ActivationFunc, ActivationDerivative, 1, layer2.NeuronsCount, Lambda);
 
             Layers.Add(layer1);
             Layers.Add(layer2);
            // Layers.Add(layer3);
-            TestCount = 4;
+            TestCount = 10;
             Lambda = 0.1;
-            Accuracy = 0.0001;
-            EpochCount = 100000;
+            Accuracy = 0.0025;
+            EpochCount = 10000;
         }
 
         
@@ -79,7 +81,7 @@ namespace NeuralNetwork
                     trainData.Add(new TrainData
                     {
                         X = new double[]{sample.X1, sample.X2},
-                        ExpectedY = new double[]{sample.Y}
+                        ExpectedY = new double[]{sample.Y/100.0}
                     });
                 }
             }
@@ -110,49 +112,70 @@ namespace NeuralNetwork
             {
                 new TrainData
                 {
-                    X = new double[] {2, 2},
-                    ExpectedY = new double[] {4}
+                    X = new double[] {0.5, 2},
+                    ExpectedY = new double[] {0, 1}
                 },
                 new TrainData
                 {
-                    X = new double[] {2, 4},
-                    ExpectedY = new double[] {8}
-                },
-                new TrainData
-                {
-                    X = new double[] {5, 5},
-                    ExpectedY = new double[] {25}
-                },
-                new TrainData
-                {
-                    X = new double[] {3, 3},
-                    ExpectedY = new double[] {9}
+                    X = new double[] {2, 0.7},
+                    ExpectedY = new double[] {1, 0}
                 },
                 // new TrainData
                 // {
-                //     X = new double[] {4, 5},
-                //     ExpectedY = new double[] {20}
+                //     X = new double[] {0.2, 3},
+                //     ExpectedY = new double[] {0.6}
                 // },
                 // new TrainData
                 // {
-                //     X = new double[] {3, 2},
-                //     ExpectedY = new double[] {6}
+                //     X = new double[] {0.5, 2},
+                //     ExpectedY = new double[] {1}
                 // },
                 // new TrainData
                 // {
-                //     X = new double[] {7, 8},
-                //     ExpectedY = new double[] {56}
+                //     X = new double[] {0.1, 1},
+                //     ExpectedY = new double[] {0.1}
                 // },
-                
+                // new TrainData
+                // {
+                //     X = new double[] {0.5, 0.6},
+                //     ExpectedY = new double[] {0.3}
+                // },
+                // new TrainData
+                // {
+                //     X = new double[] {0.25, 25},
+                //     ExpectedY = new double[] {0.625}
+                // },
             };
+            return trainData;
+        }
+
+
+        private List<TrainData> ImagesTrain()
+        {
+            var images = MnistProcessor.ImageDtos();
+        
+            var inputImages = images.Select(NeuronInputImage.FromDigitImage).ToList();
+
+
+            var trainData = new List<TrainData>();
+            foreach (var example in inputImages.Take(100))
+            {
+                trainData.Add(new TrainData
+                {
+                    X = example.NormalizedBytes,
+                    ExpectedY = example.VectorizedLabel
+                });
+            }
+
             return trainData;
         }
         
         public void SetTrainData()
         {
-           // TrainData = GetMultiplyTableTrain();
-           TrainData = GetXORTrain();
-           //TrainData = GetTest();
+            //TrainData = GetMultiplyTableTrain();
+           //TrainData = GetXORTrain();
+           TrainData = GetTest();
+           //TrainData = ImagesTrain();
         }
 
 
@@ -279,7 +302,7 @@ namespace NeuralNetwork
         }
 
         //RELU
-        private static double ActivationFunc(double val)
+        private static double ActivationFunc(double val, double[] foo)
         { 
             //return val;
             //return val >= 0 ? val : 0;
@@ -289,19 +312,38 @@ namespace NeuralNetwork
         }
 
         //RELU'
-        private static double ActivationDerivative(double val)
+        private static double ActivationDerivative(double val, double[] foo)
         {
             //return 1;
             //return  1 - val * val;
             return val * (1 - val);
         }
         
+        private static double ActivationSoftMax(double val, double[] allLayer)
+        {
+            double sum = 0; 
+            for (int i = 0; i < allLayer.Length; i++)
+            {
+                sum += Math.Pow(Math.E, allLayer[i]);
+            }
+
+            return Math.Pow(Math.E, val) / sum;
+        }
+
+        private static double ActivationSoftMaxDerivative(double val, double[] allLayer)
+        {
+            var softMax = ActivationSoftMax(val, allLayer);
+
+            return softMax * (1 - softMax);
+        }
+        
+        
         private static double[] OutputDeltas(double[] outputNeurons, double[] expectedY)
         {
             double[] deltas = new double[outputNeurons.Length];
             for (int i = 0; i < outputNeurons.Length; i++)
             {
-                deltas[i] = 2 * (outputNeurons[i] - expectedY[i]) * ActivationDerivative(outputNeurons[i]);
+                deltas[i] = 2 * (outputNeurons[i] - expectedY[i]) * ActivationDerivative(outputNeurons[i], outputNeurons);
             }
 
             return deltas;

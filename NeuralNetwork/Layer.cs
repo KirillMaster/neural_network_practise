@@ -5,9 +5,9 @@ namespace NeuralNetwork
 {
     public class Layer
     {
-        private Func<double, double> ActivationFunc { get; set; }
+        private Func<double, double[], double> ActivationFunc { get; set; }
         
-        private Func<double, double> ActivationFuncDerivative { get; set; }
+        private Func<double, double[],double> ActivationFuncDerivative { get; set; }
         public int NeuronsCount { get; set; }
         private int PreviousLayerOutputsCount { get; set; }
         private double[] PreviousLayerOutputs { get; set; }
@@ -19,7 +19,7 @@ namespace NeuralNetwork
         private double[,] w { get; set; } 
         private double[] bias { get; set; } 
 
-        public Layer(Func<double, double> activationFunc, Func<double, double> activationFuncDerivative, int neuronsCount, int previousLayerOutputsCount, double lambda)
+        public Layer(Func<double, double[],double> activationFunc, Func<double, double[],double> activationFuncDerivative, int neuronsCount, int previousLayerOutputsCount, double lambda)
         {
             ActivationFunc = activationFunc;
             NeuronsCount = neuronsCount;
@@ -33,7 +33,7 @@ namespace NeuralNetwork
 
         private double[] Activation(double[] outputs)
         {
-            return outputs.Select(ActivationFunc).ToArray();
+            return outputs.Select(output => ActivationFunc(output, outputs)).ToArray();
         }
 
         public double[] Forward()
@@ -76,7 +76,7 @@ namespace NeuralNetwork
             {
                 for (int j = 0; j < NeuronsCount; j++)
                 {
-                    previousLayerDeltas[i] += outputDeltas[j] * w[i, j] * ActivationFuncDerivative(PreviousLayerOutputs[i]);
+                    previousLayerDeltas[i] += outputDeltas[j] * w[i, j] * ActivationFuncDerivative(PreviousLayerOutputs[i], PreviousLayerOutputs);
                 }
             }
             

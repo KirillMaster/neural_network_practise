@@ -13,7 +13,7 @@ namespace NeuralNetwork
             {
                 for (int j = 0; j < colCount; j++)
                 {
-                    source[i, j] = GetRandomWeight(random);//(i + j) / 10.0;//GetRandomWeight(random);
+                    source[i, j] = GetRandomWeight(random);//(i + j) / 10.0;//GetRandomWeight(random);//(i + j) / 10.0;//GetRandomWeight(random);
                 }
             }
 
