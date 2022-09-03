@@ -9,16 +9,17 @@ namespace NeuralNetwork
         
         private static double[] x = RandomHelper.FillRandomly(InputsCount); //new double[InputsCount]{1, 2};
 
-        private static double[] expectedY = new double[thirdLayerNeuronsCount] {0};
+        private static double[] expectedY = new double[fourthLayerNeuronsCount] {0};
  
         //inputs
         private const int InputsCount = 2;
         
         //neurons
-        private const int firstLayerNeuronsCount = 3;
-        private const int secondLayerNeuronsCount = 2;
+        private const int firstLayerNeuronsCount = 10;
+        private const int secondLayerNeuronsCount = 3;
         
-        private const int thirdLayerNeuronsCount = 1;
+        private const int thirdLayerNeuronsCount = 2;
+        private const int fourthLayerNeuronsCount = 1;
 
 
         private static double[,] w1 = RandomHelper.FillRandomly(InputsCount, firstLayerNeuronsCount);
@@ -29,17 +30,25 @@ namespace NeuralNetwork
         
         private static double[,] w3 = RandomHelper.FillRandomly(secondLayerNeuronsCount, thirdLayerNeuronsCount);
         private static double[] bias3 = RandomHelper.FillRandomly(thirdLayerNeuronsCount);
+        
+        private static double[,] w4 = RandomHelper.FillRandomly(thirdLayerNeuronsCount, fourthLayerNeuronsCount);
+        private static double[] bias4 = RandomHelper.FillRandomly(fourthLayerNeuronsCount);
       
 
-        private static double lambda = 0.000001;
+        private static double lambda = 0.0000012;
 
 
         private static double[] v1 = new double[firstLayerNeuronsCount];
         private static double[] f1 = new double[firstLayerNeuronsCount];
+        
         private static double[] v2 = new double[secondLayerNeuronsCount];
         private static double[] f2 = new double[secondLayerNeuronsCount];
-        private static double[] vOut = new double[thirdLayerNeuronsCount];
-        private static double[] y = new double[thirdLayerNeuronsCount];
+        
+        private static double[] v3 = new double[thirdLayerNeuronsCount];
+        private static double[] f3 = new double[thirdLayerNeuronsCount];
+        
+        private static double[] v4 = new double[fourthLayerNeuronsCount];
+        private static double[] y = new double[fourthLayerNeuronsCount];
         private static double NetError = 0;
         
         private static int imagesCount = 10000;
@@ -217,7 +226,7 @@ namespace NeuralNetwork
             var multiplyTable = GetMultiplyTable();
 
             
-            for (var epoch = 0; epoch < 50000; epoch++)
+            for (var epoch = 0; epoch < 200000; epoch++)
             {
                 var sampleErrors = new List<double>();
                 
@@ -268,7 +277,9 @@ namespace NeuralNetwork
             SecondLayerForward();
             SecondLayerActivation();
             ThirdLayerForward();
-            y = ThirdLayerActivation();
+            ThirdLayerActivation();
+            FourthLayerForward();
+            y = FourthLayerActivation();
             
             
             return SampleError(y);
@@ -338,14 +349,36 @@ namespace NeuralNetwork
             }
            
 
-            vOut = result;
+            v3 = result;
+        }
+        
+        private static void FourthLayerForward()
+        {
+            double[] result = new double[fourthLayerNeuronsCount];
+            
+            for (int i = 0; i < fourthLayerNeuronsCount; i++)
+            {
+                for (int j = 0; j < thirdLayerNeuronsCount; j++)
+                {
+                    result[i] += f3[j] * w4[j, i] + bias4[i];
+                }
+            }
+           
+
+            v4 = result;
+        }
+
+        private static double[] FourthLayerActivation()
+        {
+            y = v4.Select(ActivationFunc).ToArray();
+            return y;
         }
 
         private static double[] ThirdLayerActivation()
         {
             //y = vOut.Select(val => ActivationSoftMax(val, vOut)).ToArray();
-            y = vOut.Select(ActivationFunc).ToArray();
-            return y;
+            f3 = v3.Select(ActivationFunc).ToArray();
+            return f3;
         }
 
 
@@ -392,9 +425,13 @@ namespace NeuralNetwork
 
             var deltas = OutputDeltas(y);
             
-            ModifyThirdLayerWeights(deltas);
+            ModifyFourthLayerWeights(deltas);
 
-            var secondLayerDeltas = SecondLayerDeltas(deltas);
+            var thirdLayerDeltas = ThirdLayerDeltas(deltas);
+            
+            ModifyThirdLayerWeights(thirdLayerDeltas);
+
+            var secondLayerDeltas = SecondLayerDeltas(thirdLayerDeltas);
 
             ModifySecondLayerWeights(secondLayerDeltas);
 
@@ -451,20 +488,46 @@ namespace NeuralNetwork
             // return deltas;
         }
 
-        private static void ModifyThirdLayerWeights(double[] lastLayerDeltas)
+        private static void ModifyFourthLayerWeights(double[] lastLayerDeltas)
+        {
+            for (int i = 0; i < thirdLayerNeuronsCount; i++)
+            {
+                for (int j = 0; j < fourthLayerNeuronsCount; j++)
+                {
+                    w4[i,j] = w4[i,j] - lambda * lastLayerDeltas[j] * f3[i];
+                    bias4[j] = bias4[j] - lambda * lastLayerDeltas[j] * 1;
+                } 
+            }
+        }
+
+        private static void ModifyThirdLayerWeights(double[] fourthLayerDeltas)
         {
             //modify weights
             for (int i = 0; i < secondLayerNeuronsCount; i++)
             {
                 for (int j = 0; j < thirdLayerNeuronsCount; j++)
                 {
-                    w3[i,j] = w3[i,j] - lambda * lastLayerDeltas[j] * f2[i];
-                    bias3[j] = bias3[j] - lambda * lastLayerDeltas[j] * 1;
+                    w3[i,j] = w3[i,j] - lambda * fourthLayerDeltas[j] * f2[i];
+                    bias3[j] = bias3[j] - lambda * fourthLayerDeltas[j] * 1;
                 } 
             }
         }
 
-        private static double[] SecondLayerDeltas(double[] outputDeltas)
+        private static double[] ThirdLayerDeltas(double[] outputDeltas)
+        {
+            double[] thirdLayerDeltas = new double[thirdLayerNeuronsCount];
+            for (int i = 0; i < thirdLayerNeuronsCount; i++)
+            {
+                for (int j = 0; j < fourthLayerNeuronsCount; j++)
+                {
+                    thirdLayerDeltas[i] += outputDeltas[j] * w4[i, j] * ActivationDerivative(f3[i]);
+                }
+            }
+            
+            return thirdLayerDeltas;
+        }
+
+        private static double[] SecondLayerDeltas(double[] thirdLayerDeltas)
         {
                
             double[] secondLayerDeltas = new double[secondLayerNeuronsCount];
@@ -472,21 +535,21 @@ namespace NeuralNetwork
             {
                 for (int j = 0; j < thirdLayerNeuronsCount; j++)
                 {
-                    secondLayerDeltas[i] += outputDeltas[j] * w3[i, j] * ActivationDerivative(f2[i]);
+                    secondLayerDeltas[i] += thirdLayerDeltas[j] * w3[i, j] * ActivationDerivative(f2[i]);
                 }
             }
             
             return secondLayerDeltas;
         }
 
-        private static void ModifySecondLayerWeights(double[] outputDeltas)
+        private static void ModifySecondLayerWeights(double[] thirdLayerDeltas)
         {
             for (int i = 0; i < firstLayerNeuronsCount; i++)
             {
                 for (int j = 0; j < secondLayerNeuronsCount; j++)
                 {
-                    w2[i,j] = w2[i,j] - lambda * outputDeltas[j] * f1[i];
-                    bias2[j] = bias2[j] - lambda * outputDeltas[j] * 1;
+                    w2[i,j] = w2[i,j] - lambda * thirdLayerDeltas[j] * f1[i];
+                    bias2[j] = bias2[j] - lambda * thirdLayerDeltas[j] * 1;
                 }
             }
         }
