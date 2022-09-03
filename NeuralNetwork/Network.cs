@@ -15,7 +15,7 @@ namespace NeuralNetwork
         private const int InputsCount = 2;
         
         //neurons
-        private const int firstLayerNeuronsCount = 2;
+        private const int firstLayerNeuronsCount = 3;
         private const int secondLayerNeuronsCount = 1;
         
         private const int thirdLayerNeuronsCount = 1;
@@ -31,7 +31,7 @@ namespace NeuralNetwork
         private static double[] bias3 = RandomHelper.FillRandomly(thirdLayerNeuronsCount);
       
 
-        private static double lambda = 0.01;
+        private static double lambda = 0.1;
 
 
         private static double[] v1 = new double[firstLayerNeuronsCount];
@@ -93,58 +93,68 @@ namespace NeuralNetwork
             double error = 0;
 
             var rand = new Random();
-
-            for (var epoch = 0; epoch < 100; epoch++)
+            
+            for (var epoch = 0; epoch < 20000; epoch++)
             {
-                x = new double[] {2, 2};
-                expectedY = new double[] {4};
+                // foreach (var xorSample in xorSet.Take(2))
+                // {
+                    x = xorSet[0].Input;
+                    expectedY = xorSet[0].Output;
+                
+                    error = Forward();
+                    Console.WriteLine($"Loss 1 :           {error}");
+                    Backward();
+                // }
+                
+                
+                x = xorSet[1].Input;
+                expectedY = xorSet[1].Output;
+                
                 error = Forward();
-                Console.WriteLine($"Loss:           {error}");
+                Console.WriteLine($"Loss 2 :           {error}");
                 Backward();
+                
+                x = xorSet[2].Input;
+                expectedY = xorSet[2].Output;
+                
+                error = Forward();
+                Console.WriteLine($"Loss 3 :           {error}");
+                Backward();
+                
+                x = xorSet[3].Input;
+                expectedY = xorSet[3].Output;
+                
+                error = Forward();
+                Console.WriteLine($"Loss 4 :           {error}");
+                Backward();
+                //Console.WriteLine($"Epoch Loss:         {error}");
             }
-
-         
-            //
-            // for (var epoch = 0; epoch < 10000; epoch++)
-            // {
-            //     foreach (var xorSample in xorSet)
-            //     {
-            //         x = xorSample.Input;
-            //         expectedY = xorSample.Output;
-            //     
-            //         error = Forward();
-            //         Console.WriteLine($"Loss:           {error}");
-            //         Backward();
-            //     }
-            //     
-            //     //Console.WriteLine($"Epoch Loss:         {error}");
-            // }
-            //
-            //
-            // x = xorSet[0].Input;
-            // expectedY = xorSet[0].Output;
-            // Forward();
-            // Console.WriteLine($"Operation {x[0]} XOR {x[1]}");
-            // Console.WriteLine($"Result {GetOutputAsString()}");
-            //
-            // x = xorSet[1].Input;
-            // expectedY = xorSet[1].Output;
-            // Forward();
-            // Console.WriteLine($"Operation {x[0]} XOR {x[1]}");
-            // Console.WriteLine($"Result {GetOutputAsString()}");
-            //
-            //
-            // x = xorSet[2].Input;
-            // expectedY = xorSet[2].Output;
-            // Forward();
-            // Console.WriteLine($"Operation {x[0]} XOR {x[1]}");
-            // Console.WriteLine($"Result {GetOutputAsString()}");
-            //
-            // x = xorSet[3].Input;
-            // expectedY = xorSet[3].Output;
-            // Forward();
-            // Console.WriteLine($"Operation {x[0]} XOR {x[1]}");
-            // Console.WriteLine($"Result {GetOutputAsString()}");
+            
+            
+            x = xorSet[0].Input;
+            expectedY = xorSet[0].Output;
+            Forward();
+            Console.WriteLine($"Operation {x[0]} XOR {x[1]}");
+            Console.WriteLine($"Result {GetOutputAsString()}");
+            
+            x = xorSet[1].Input;
+            expectedY = xorSet[1].Output;
+            Forward();
+            Console.WriteLine($"Operation {x[0]} XOR {x[1]}");
+            Console.WriteLine($"Result {GetOutputAsString()}");
+            
+            
+            x = xorSet[2].Input;
+            expectedY = xorSet[2].Output;
+            Forward();
+            Console.WriteLine($"Operation {x[0]} XOR {x[1]}");
+            Console.WriteLine($"Result {GetOutputAsString()}");
+            
+            x = xorSet[3].Input;
+            expectedY = xorSet[3].Output;
+            Forward();
+            Console.WriteLine($"Operation {x[0]} XOR {x[1]}");
+            Console.WriteLine($"Result {GetOutputAsString()}");
             // var x1 = rand.Next(1, 10);
             // var x2 = rand.Next(1, 10);
             //
@@ -197,7 +207,7 @@ namespace NeuralNetwork
             {
                 for (int j = 0; j < firstLayerNeuronsCount; j++)
                 {
-                    result[i] += x[j] * w2[j,i] + bias2[i];
+                    result[i] += f1[j] * w2[j,i] + bias2[i];
                 }
             }
 
@@ -264,18 +274,18 @@ namespace NeuralNetwork
         //RELU
         private static double ActivationFunc(double val)
         {
-            return val >= 0 ? val : 0;
+            //return val >= 0 ? val : 0;
             //return (Math.Pow(Math.E, val) - Math.Pow(Math.E, -val)) / (Math.Pow(Math.E, val) + Math.Pow(Math.E, -val));
 
-             //return 1 / (1 + Math.Pow(Math.E, -val));
+             return 1 / (1 + Math.Pow(Math.E, -val));
         }
 
         //RELU'
         private static double ActivationDerivative(double val)
         {
-            return 1;
+           // return 1;
             //return  1 - val * val;
-           // return val * (1 - val);
+            return val * (1 - val);
         }
         
 
