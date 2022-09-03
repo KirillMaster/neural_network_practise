@@ -1,37 +1,37 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Accord.Math;
 
 namespace NeuralNetwork
 {
     public class Network
     {
         
-        private static double[] x = FillRandomly(InputsCount); //new double[InputsCount]{1, 2};
+        private static double[] x = RandomHelper.FillRandomly(InputsCount); //new double[InputsCount]{1, 2};
 
-        private static double[] expectedY = new double[thirdLayerNeuronsCount] {0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
-
+        private static double[] expectedY = new double[thirdLayerNeuronsCount] {0};
+ 
         //inputs
-        private const int InputsCount = 784;
+        private const int InputsCount = 2;
         
         //neurons
-        private const int firstLayerNeuronsCount = 128;
-        private const int secondLayerNeuronsCount = 8;
-        private const int thirdLayerNeuronsCount = 10;
+        private const int firstLayerNeuronsCount = 2;
+        private const int secondLayerNeuronsCount = 1;
+        
+        private const int thirdLayerNeuronsCount = 1;
 
 
-        private static double[,] w1 = FillRandomly(firstLayerNeuronsCount, InputsCount);
-        private static double[] bias1 = FillRandomly(firstLayerNeuronsCount);
+        private static double[,] w1 = RandomHelper.FillRandomly(InputsCount, firstLayerNeuronsCount);
+        private static double[] bias1 = RandomHelper.FillRandomly(firstLayerNeuronsCount);
         
-        private static double[,] w2 = FillRandomly(secondLayerNeuronsCount, firstLayerNeuronsCount);
-        private static double[] bias2 = FillRandomly(secondLayerNeuronsCount);
+        private static double[,] w2 = RandomHelper.FillRandomly(firstLayerNeuronsCount,secondLayerNeuronsCount);
+        private static double[] bias2 = RandomHelper.FillRandomly(secondLayerNeuronsCount);
         
-        private static double[,] w3 = FillRandomly(thirdLayerNeuronsCount, secondLayerNeuronsCount);
-        private static double[] bias3 = FillRandomly(thirdLayerNeuronsCount);
+        private static double[,] w3 = RandomHelper.FillRandomly(thirdLayerNeuronsCount, secondLayerNeuronsCount);
+        private static double[] bias3 = RandomHelper.FillRandomly(thirdLayerNeuronsCount);
       
 
-        private static double lambda = 0.1;
+        private static double lambda = 0.01;
 
 
         private static double[] v1 = new double[firstLayerNeuronsCount];
@@ -40,142 +40,137 @@ namespace NeuralNetwork
         private static double[] f2 = new double[secondLayerNeuronsCount];
         private static double[] vOut = new double[thirdLayerNeuronsCount];
         private static double[] y = new double[thirdLayerNeuronsCount];
+        private static double NetError = 0;
         
-
+        private static int imagesCount = 10000;
 
         public void Train(List<NeuronInputImage> images)
         {
             images =  RandomExtensions.Shuffle(images.ToArray());
             
             
-            var imagesCount = 10;
             double loss = Double.PositiveInfinity;
             var accuracy = 0.001;
-            var i = 0;
             var maxIter = 1000000;
+
+            var batchlength = 100;
             
-            for(int k = 0; k < 1000; k ++ ){
-                foreach (var image in images.Take(imagesCount))
+            
+            var batches = Enumerable.Range(0, imagesCount/batchlength)
+                .Select(i => images.Skip(i * batchlength)
+                    .Take(batchlength)
+                    .ToList())
+                .ToList();
+
+            foreach (var batch in batches)
+            {
+                foreach (var image in batch)
                 {
                     x = image.NormalizedBytes;
                     expectedY = image.VectorizedLabel;
                     Forward();
-                    loss = Backward(y);
-                    Console.WriteLine($"Loss:           {loss}");
                     // Console.WriteLine($"Forward: {Forward()}");
+                   // Console.WriteLine($"Loss:           {NetError}");
                 }
+                
+               // Backward(y);
+                Console.WriteLine($"Batch Loss:           {NetError}");
             }
-            
-            Console.WriteLine($"Loss:           {loss}");
+
+            Console.WriteLine($"Loss:           {NetError}");
             var random = new Random().Next(0, imagesCount-1);
             Console.WriteLine($"Test: {images[random].Value}");
-            Console.WriteLine("Prediction: ");
+            Console.WriteLine("outputNeurons: ");
             x = images[random].NormalizedBytes;
             Console.WriteLine(Forward());
             Console.WriteLine(NeuronInputImage.FromVectorizedLabel(y));
         }
-        
-        
-        // Forward();
-        // while (Math.Abs(loss) > accuracy &&  i < maxIter)
-        // {
-        //     x = images[0].NormalizedBytes;
-        //     expectedY = images[0].VectorizedLabel;
-        //     
-        //     Backward(y);
-        //
-        //     loss = Loss(expectedY, y);
-        //     Console.WriteLine($"ForwardResult : {Forward()}");
-        //     i++;
-        // }
-        //
-        // Console.WriteLine($"Loss:           {loss}");
-        // Console.WriteLine($"Iterations: {i}");
-        //
-        //
-        // var test = images.Where(x => x.Value == 7).ToList();
-        // var another = test[2];
-        // another = images[5];
-        //
-        //
-        // x = another.NormalizedBytes;
-        // Console.WriteLine(Forward());
 
 
-        public void TrainTest()
+        public void TrainTest(List<NeuronInputImage> images)
         {
-            double loss = Double.PositiveInfinity;
-            var accuracy = 0.001;
-            var i = 0;
-            var maxIter = 1000;
-            Forward();
-            while (Math.Abs(loss) > accuracy &&  i < maxIter)
-            {
-                Backward(y);
-           
-                loss = Loss(expectedY, y);
-                Console.WriteLine($"ForwardResult : {Forward()}");
-                Console.WriteLine($"Loss:           {loss}");
-                i++;
-            }
- 
+            var xorSet = XORSet.Set();
+            double error = 0;
 
-            Console.WriteLine($"Iterations: {i}");
-        }
-        
-        private static double Loss(double[] expectedOutput, double[] prediction)
-        {
-            double sum = 0;
-            for(int i = 0; i < expectedOutput.Length; i ++)
+            var rand = new Random();
+
+            for (var epoch = 0; epoch < 100; epoch++)
             {
-                sum += Math.Abs(expectedOutput[i] - prediction[i]);
+                x = new double[] {2, 2};
+                expectedY = new double[] {4};
+                error = Forward();
+                Console.WriteLine($"Loss:           {error}");
+                Backward();
             }
 
-            return sum / expectedOutput.Length;
-        }
-
-        private static double[,] FillRandomly(int rowCount, int colCount)
-        {
-            var random = new Random();
+         
+            //
+            // for (var epoch = 0; epoch < 10000; epoch++)
+            // {
+            //     foreach (var xorSample in xorSet)
+            //     {
+            //         x = xorSample.Input;
+            //         expectedY = xorSample.Output;
+            //     
+            //         error = Forward();
+            //         Console.WriteLine($"Loss:           {error}");
+            //         Backward();
+            //     }
+            //     
+            //     //Console.WriteLine($"Epoch Loss:         {error}");
+            // }
+            //
+            //
+            // x = xorSet[0].Input;
+            // expectedY = xorSet[0].Output;
+            // Forward();
+            // Console.WriteLine($"Operation {x[0]} XOR {x[1]}");
+            // Console.WriteLine($"Result {GetOutputAsString()}");
+            //
+            // x = xorSet[1].Input;
+            // expectedY = xorSet[1].Output;
+            // Forward();
+            // Console.WriteLine($"Operation {x[0]} XOR {x[1]}");
+            // Console.WriteLine($"Result {GetOutputAsString()}");
+            //
+            //
+            // x = xorSet[2].Input;
+            // expectedY = xorSet[2].Output;
+            // Forward();
+            // Console.WriteLine($"Operation {x[0]} XOR {x[1]}");
+            // Console.WriteLine($"Result {GetOutputAsString()}");
+            //
+            // x = xorSet[3].Input;
+            // expectedY = xorSet[3].Output;
+            // Forward();
+            // Console.WriteLine($"Operation {x[0]} XOR {x[1]}");
+            // Console.WriteLine($"Result {GetOutputAsString()}");
+            // var x1 = rand.Next(1, 10);
+            // var x2 = rand.Next(1, 10);
+            //
+            // x = new double[] {x1, x2};
+            // expectedY = new double []{x1 * x2};
+            // Console.WriteLine($"Operation: {x[0]} * {x[1]}");
             
-            var source = new double[rowCount,colCount];
-            for (int i = 0; i < rowCount; i++)
-            {
-                for (int j = 0; j < colCount; j++)
-                {
-                    source[i, j] = GetRandomWeight(random);
-                }
-            }
-
-            return source;
         }
 
-        private static double[] FillRandomly(int rowCount)
-        {
-            var source = new double[rowCount];
-            var random = new Random();
-            for (int j = 0; j < rowCount; j++)
-            {
-                source[j] = GetRandomWeight(random);
-            }
-
-            return source;
-        }
-        
-        private static double GetRandomWeight(Random random)
-        {
-            return random.NextDouble() * (random.Next(0, 1) == 0 ? 1 : -1) * 0.01;
-        }
-
-        public static string Forward()
+        public static double Forward()
         {
             FirstLayerForward();
             FirstLayerActivation();
             SecondLayerForward();
-            SecondLayerActivation();
-            ThirdLayerForward();
-            ThirdLayerActivation();
+            y =SecondLayerActivation();
+            // SecondLayerForward();
+          
+            // ThirdLayerForward();
+            // ThirdLayerActivation();
             
+            
+            return SampleError(y);
+        }
+
+        string GetOutputAsString()
+        {
             return string.Join(", ", y.Select(z => string.Format("{0:f2}", z)));
         }
 
@@ -187,35 +182,42 @@ namespace NeuralNetwork
             {
                 for (int j = 0; j < InputsCount; j++)
                 {
-                    result[i] += x[j] * w1[i,j] + bias1[i];
+                    result[i] += x[j] * w1[j,i] + bias1[i];
                 }
             }
 
             v1 = result;
         }
-
-        private static void FirstLayerActivation()
-        {
-            f1 = v1.Select(ActivationFunc).ToArray();
-        }
-
+        
         private static void SecondLayerForward()
         {
-            double[] result = new double[secondLayerNeuronsCount];
+            var result = new double[secondLayerNeuronsCount];
+
             for (int i = 0; i < secondLayerNeuronsCount; i++)
             {
                 for (int j = 0; j < firstLayerNeuronsCount; j++)
                 {
-                    result[i] += f1[j] * w2[i,j] + bias2[i];
+                    result[i] += x[j] * w2[j,i] + bias2[i];
                 }
             }
 
             v2 = result;
         }
 
-        private static void SecondLayerActivation()
+        private static double[] FirstLayerActivation()
+        {
+            f1 = v1.Select(ActivationFunc).ToArray();
+
+            //f1 = v1.Select(input => ActivationSoftMax(input, v1)).ToArray();
+            return f1;
+        }
+
+        
+
+        private static double[] SecondLayerActivation()
         {
             f2 = v2.Select(ActivationFunc).ToArray();
+            return f2;
         }
 
         private static void ThirdLayerForward()
@@ -236,7 +238,8 @@ namespace NeuralNetwork
 
         private static void ThirdLayerActivation()
         {
-             y = vOut.Select(val => ActivationSoftMax(val, vOut)).ToArray();
+            //y = vOut.Select(val => ActivationSoftMax(val, vOut)).ToArray();
+            y = vOut.Select(ActivationFunc).ToArray();
         }
 
 
@@ -261,141 +264,150 @@ namespace NeuralNetwork
         //RELU
         private static double ActivationFunc(double val)
         {
-           // return val;
-           // return (Math.Pow(Math.E, val) - Math.Pow(Math.E, -val)) / (Math.Pow(Math.E, val) + Math.Pow(Math.E, -val));
+            return val >= 0 ? val : 0;
+            //return (Math.Pow(Math.E, val) - Math.Pow(Math.E, -val)) / (Math.Pow(Math.E, val) + Math.Pow(Math.E, -val));
 
-             return 1 / (1 + Math.Pow(Math.E, -val));
+             //return 1 / (1 + Math.Pow(Math.E, -val));
         }
 
         //RELU'
         private static double ActivationDerivative(double val)
         {
-            //return 1;
-           // return  1 - val * val;
-             return val * (1 - val);
+            return 1;
+            //return  1 - val * val;
+           // return val * (1 - val);
         }
+        
 
-
-
-        private static double Backward(double[] prediction)
+        private static void Backward()
         {
-           // var e =  OutputErrors(prediction);
-            var e = OutputErrors(prediction);
-            var deltas = OutputDeltas(e, prediction);
-            var secondLayerDeltas = ModifyThirdLayerWeights(deltas);
-            ModifySecondLayerWeights(secondLayerDeltas);
-            ModifyFirstLayerWeights(secondLayerDeltas);
+            //var e =  OutputErrors(outputNeurons);
 
-            return TotalError(e);
-        }
+            var deltas = OutputDeltas(y);
+            ModifySecondLayerWeights(deltas);
 
-
-        private static double TotalError(double[] errors)
-        {
-            double sum = 0;
-            for (int i = 0; i < errors.Length; i++)
-            {
-                sum += Math.Abs(errors[i]);
-            }
-
-            return sum;
-        }
-
-
-        private static double[] CrossEntropyErrors(double[] prediction)
-        {
-            double[] errors = new double[prediction.Length];
+            var firstLayerDeltas = FirstLayerDeltas(deltas);
+          //  var secondLayerDeltas = SecondLayerDeltas(deltas);
+            ModifyFirstLayerWeights(firstLayerDeltas);
             
-            for (int i = 0; i < prediction.Length; i++)
+            // ModifyThirdLayerWeights(deltas);
+            //
+            // var secondLayerDeltas = SecondLayerDeltas(deltas);
+            // ModifySecondLayerWeights(secondLayerDeltas);
+            
+          //  var firstLayerDeltas = FirstLayerDeltas(deltas);
+       
+        }
+
+        private static double SampleError(double[] outputNeurons)
+        {
+            double error = 0;
+            for (int i = 0; i < outputNeurons.Length; i++)
             {
-                errors[i] = -1 * expectedY[i] * Math.Log(prediction[i]);
+                error += Math.Pow((outputNeurons[i] - expectedY[i]), 2);
             }
 
-            return errors;
+            return error;
         }
 
 
-        private static double[] OutputErrors(double[] prediction)
+        private static double CrossEntropyError(double[] outputNeurons)
         {
-            double[] errors = new double[prediction.Length];
-            for (int i = 0; i < prediction.Length; i++)
+            for (int i = 0; i < outputNeurons.Length; i++)
             {
-                errors[i] = prediction[i] - expectedY[i];
+                NetError += -1 * expectedY[i] * Math.Log(outputNeurons[i]);
             }
 
-            return errors;
+            NetError = NetError / imagesCount;
+
+            return NetError;
         }
 
-        private static double[] OutputDeltas(double[] errors, double[] prediction)
+        private static double[] OutputDeltas(double[] outputNeurons)
         {
-            double[] deltas = new double[errors.Length];
-            for (int i = 0; i < errors.Length; i++)
+            double[] deltas = new double[outputNeurons.Length];
+            for (int i = 0; i < outputNeurons.Length; i++)
             {
-                deltas[i] = errors[i] * ActivationSoftMaxDerivative(prediction[i], prediction);
+                //derivative of loss function
+                deltas[i] = 2 * (outputNeurons[i] - expectedY[i]) *ActivationDerivative(outputNeurons[i]);
+                            /*ActivationSoftMaxDerivative(outputNeurons[i],
+                                outputNeurons);*/ 
             }
 
             return deltas;
+            // double[] deltas = new double[outputNeurons.Length];
+            // for (int i = 0; i < outputNeurons.Length; i++)
+            // {
+            //     deltas[i] = netError * ActivationDerivative(outputNeurons[i]); 
+            //     /*ActivationSoftMaxDerivative(outputNeurons[i], outputNeurons);*/
+            // }
+            //
+            // return deltas;
         }
 
-        private static double[] ModifyThirdLayerWeights(double[] lastNeuronDeltas)
+        // private static void ModifyThirdLayerWeights(double[] lastLayerDeltas)
+        // {
+        //     //modify weights
+        //     for (int i = 0; i < secondLayerNeuronsCount; i++)
+        //     {
+        //         for (int j = 0; j < thirdLayerNeuronsCount; j++)
+        //         {
+        //             w3[i,j] = w3[i,j] - lambda * lastLayerDeltas[j] * f2[j];
+        //             bias3[i] = bias3[i] - lambda * lastLayerDeltas[j] * 1;
+        //         } 
+        //     }
+        // }
+
+        // private static double[] SecondLayerDeltas(double[] lastLayerDeltas)
+        // {
+        //        
+        //     double[] secondLayerDeltas = new double[secondLayerNeuronsCount];
+        //     for (int i = 0; i < firstLayerNeuronsCount; i++)
+        //     {
+        //         for (int j = 0; j < secondLayerNeuronsCount; j++)
+        //         {
+        //             secondLayerDeltas[i] += lastLayerDeltas[j] * w3[i, j] * ActivationDerivative(f2[j]);
+        //         }
+        //     }
+        //     
+        //     return secondLayerDeltas;
+        // }
+
+        private static void ModifySecondLayerWeights(double[] outputDeltas)
         {
-            double[] secondLayerDeltas = new double[secondLayerNeuronsCount];
-            
-            //modify weights
-            for (int i = 0; i < thirdLayerNeuronsCount; i++)
+            for (int i = 0; i < firstLayerNeuronsCount; i++)
             {
                 for (int j = 0; j < secondLayerNeuronsCount; j++)
                 {
-                    w3[i,j] = w3[i,j] - lambda * lastNeuronDeltas[i] * f2[j];
-                    bias3[i] = bias3[i] - lambda * lastNeuronDeltas[i] * 1;
-                } 
-            }
-
-            for (int i = 0; i < thirdLayerNeuronsCount; i++)
-            {
-                for (var j = 0; j < secondLayerNeuronsCount; j++)
-                {
-                    secondLayerDeltas[j] = lastNeuronDeltas[i] * w3[i, j] * ActivationDerivative(f2[j]);
+                    w2[i,j] = w2[i,j] - lambda * outputDeltas[j] * f1[i];
+                    bias2[j] = bias2[j] - lambda * outputDeltas[j] * 1;
                 }
             }
-            
-            return secondLayerDeltas;
         }
 
-        private static void ModifySecondLayerWeights(double[] secondLayerDeltas)
+        private static double[] FirstLayerDeltas(double[] outputDeltas)
         {
-            for (int i = 0; i < secondLayerNeuronsCount; i++)
+            var firstLayerDeltas = new double[firstLayerNeuronsCount];
+
+            for (int i = 0; i < firstLayerNeuronsCount; i++)
+            {
+                for (int j = 0; j < secondLayerNeuronsCount; j++)
+                {
+                    firstLayerDeltas[i] += outputDeltas[j] * w2[i,j]*  ActivationDerivative(f1[i]);
+                }
+            }
+
+            return firstLayerDeltas;
+        }
+
+        private static void ModifyFirstLayerWeights(double[] firstLayerDeltas)
+        {
+            for (int i = 0; i < InputsCount; i++)
             {
                 for (int j = 0; j < firstLayerNeuronsCount; j++)
                 {
-                    w2[i,j] = w2[i,j] - lambda * secondLayerDeltas[i] * f1[j];
-                    bias2[i] = bias2[i] - lambda * secondLayerDeltas[i] * 1;
-                }
-            }
-        }
-
-        private static void ModifyFirstLayerWeights(double[] secondLayerDeltas)
-        {
-
-            var firstLayerDeltas = new double[firstLayerNeuronsCount];
-            for (int i = 0; i < firstLayerNeuronsCount; i++)
-            {
-
-                for (int j = 0; j < secondLayerNeuronsCount; j++)
-                {
-                    firstLayerDeltas[i] += secondLayerDeltas[j] * w2[j,i];
-                }
-                
-                firstLayerDeltas[i] = firstLayerDeltas[i] * ActivationDerivative(f1[i]);
-            }
-
-
-            for (int i = 0; i < firstLayerNeuronsCount; i++)
-            {
-                for (int j = 0; j < InputsCount; j++)
-                {
-                    w1[i,j] = w1[i,j] - lambda * firstLayerDeltas[i] * x[j];
-                    bias1[i] = bias1[i] - lambda * firstLayerDeltas[i] * 1;
+                    w1[i,j] = w1[i,j] - lambda * firstLayerDeltas[j] * x[i];
+                    bias1[j] = bias1[j] - lambda * firstLayerDeltas[j] * 1;
                 }
             }
         }
