@@ -15,23 +15,18 @@ namespace NeuralNetwork
         // var net = new Network();
 
 
-        var trainData = new List<TrainData>
-        {
-            new TrainData
-            {
-                X = new double[] {2, 2},
-                ExpectedY = new double[] {4}
-            },
-        };
+      
 
         var lambda = 0.0001;
         var epochCount = 10000;
         var accuracy = 0.01;
         
 
-        var neuralNet = new NeuralNet(trainData, lambda,epochCount, accuracy);
+        var neuralNet = new NeuralNet(lambda,epochCount, accuracy);
+        neuralNet.SetTrainData();
         neuralNet.Build();
         neuralNet.Train();
+        neuralNet.Test();
         // net.TrainTest(inputImages);
         //net.TrainMultiply();
         //net.Train(inputImages);
