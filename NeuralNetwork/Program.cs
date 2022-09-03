@@ -13,12 +13,12 @@ namespace NeuralNetwork
         var images = MnistProcessor.ImageDtos();
         var inputImages = images.Select(NeuronInputImage.FromDigitImage).ToList();
         var net = new Network();
-        
 
+
+        // net.TrainTest(inputImages);
+        net.TrainMultiply();
+        //net.Train(inputImages);
        
-        
-             //net.Train(inputImages);
-       net.TrainTest(inputImages);
     }
 
 

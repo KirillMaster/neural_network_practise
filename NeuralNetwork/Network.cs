@@ -15,7 +15,7 @@ namespace NeuralNetwork
         private const int InputsCount = 2;
         
         //neurons
-        private const int firstLayerNeuronsCount = 3;
+        private const int firstLayerNeuronsCount = 500;
         private const int secondLayerNeuronsCount = 1;
         
         private const int thirdLayerNeuronsCount = 1;
@@ -31,7 +31,7 @@ namespace NeuralNetwork
         private static double[] bias3 = RandomHelper.FillRandomly(thirdLayerNeuronsCount);
       
 
-        private static double lambda = 0.1;
+        private static double lambda = 0.000002;
 
 
         private static double[] v1 = new double[firstLayerNeuronsCount];
@@ -164,6 +164,103 @@ namespace NeuralNetwork
             
         }
 
+        private class Sample
+        {
+            public double X1 { get; set; }
+            public double X2 { get; set; }
+            public double Y { get; set; }
+        }
+
+        private class NumberMultiplier
+        {
+            public NumberMultiplier()
+            {
+                Samples = new Sample[10];
+            }
+            public Sample[] Samples { get; set; }
+        }
+
+        private NumberMultiplier[] GetMultiplyTable()
+        {
+            var MultiplyTable = new NumberMultiplier[10];
+            
+            for (int i = 0; i < 10; i++)
+            {
+                var  numberMultiplier = new NumberMultiplier();
+                MultiplyTable[i] = numberMultiplier;
+
+                for (int j = 0; j < 10; j++)
+                {
+                    var sample = new Sample();
+                    numberMultiplier.Samples[j] = sample;
+                    sample.X1 = i + 1;
+                    sample.X2 = j + 1;
+                    sample.Y = sample.X1 * sample.X2;
+                }
+            }
+
+            return MultiplyTable;
+        }
+
+        private double EpochLoss(List<double> sampleErrors)
+        {
+            double  sum = 0;
+            for (int i = 0; i < sampleErrors.Count; i++)
+            {
+                sum += sampleErrors[i];
+            }
+
+            return sum;
+        }
+        public void TrainMultiply()
+        {
+            var multiplyTable = GetMultiplyTable();
+
+            
+            for (var epoch = 0; epoch < 70000; epoch++)
+            {
+                var sampleErrors = new List<double>();
+                
+                for (int i = 0; i < 10; i++)
+                {
+                    var numberMultiplier = multiplyTable[i];
+
+                    for (int j = 0; j < 10; j++)
+                    {
+                        var sample = numberMultiplier.Samples[j];
+                        
+                        x = new double[] {sample.X1, sample.X2};
+                        expectedY = new double[] {sample.Y};
+                        var error = Forward();
+                        sampleErrors.Add(error); 
+                       // Console.WriteLine($"Loss {sample.X1}*{sample.X2}={GetOutputAsString()} ");
+                        Backward();
+                    }
+                }
+
+                if (epoch % 100 == 0)
+                {
+                    Console.WriteLine($"Epoch Loss: {EpochLoss(sampleErrors)} ");
+                }
+            }
+
+            for (int k = 0; k < 10; k++)
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    var number = multiplyTable[k];
+
+                    var sample = number.Samples[i];
+                
+                    x = new double[] {sample.X1, sample.X2};
+                    expectedY = new double[] {sample.Y};
+                    Forward();
+                    Console.WriteLine($"Test : {sample.X1} * {sample.X2} = {GetOutputAsString()} ");
+                }
+            }
+            
+           
+        }
         public static double Forward()
         {
             FirstLayerForward();
@@ -274,18 +371,19 @@ namespace NeuralNetwork
         //RELU
         private static double ActivationFunc(double val)
         {
-            //return val >= 0 ? val : 0;
+            //return val;
+            return val >= 0 ? val : 0;
             //return (Math.Pow(Math.E, val) - Math.Pow(Math.E, -val)) / (Math.Pow(Math.E, val) + Math.Pow(Math.E, -val));
 
-             return 1 / (1 + Math.Pow(Math.E, -val));
+            //return 1 / (1 + Math.Pow(Math.E, -val));
         }
 
         //RELU'
         private static double ActivationDerivative(double val)
         {
-           // return 1;
+            return 1;
             //return  1 - val * val;
-            return val * (1 - val);
+            //return val * (1 - val);
         }
         
 
