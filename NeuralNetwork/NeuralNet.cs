@@ -37,10 +37,10 @@ namespace NeuralNetwork
             Layers.Add(layer1);
             Layers.Add(layer2);
           //  Layers.Add(layer3);
-            TestCount = 1;
+            TestCount = 2;
             Lambda = 0.01;
             Accuracy = 0.0001;
-            EpochCount = 1000;
+            EpochCount = 10000;
         }
 
         
@@ -113,16 +113,16 @@ namespace NeuralNetwork
                     X = new double[] {2, 2},
                     ExpectedY = new double[] {4}
                 },
-                // new TrainData
-                // {
-                //     X = new double[] {2, 4},
-                //     ExpectedY = new double[] {8}
-                // },
-                // new TrainData
-                // {
-                //     X = new double[] {5, 5},
-                //     ExpectedY = new double[] {25}
-                // },
+                new TrainData
+                {
+                    X = new double[] {2, 4},
+                    ExpectedY = new double[] {8}
+                },
+                new TrainData
+                {
+                    X = new double[] {5, 5},
+                    ExpectedY = new double[] {25}
+                },
             };
             return trainData;
         }
@@ -249,13 +249,12 @@ namespace NeuralNetwork
         private void Backward(double[] output, double[] expectedY)
         {
             var deltas = OutputDeltas(output, expectedY);
-            var lastLayerIndex = Layers.Count - 1;
 
 
-            for (int k = Layers.Count - 1; k >= 0; k--)
+            for (int k = Layers.Count-1; k >= 0; k--)
             {
-                Layers[lastLayerIndex].SetNextLayerDeltas(deltas);
-                deltas = Layers[lastLayerIndex].Backward();
+                Layers[k].SetNextLayerDeltas(deltas);
+                deltas = Layers[k].Backward();
             }
         }
 

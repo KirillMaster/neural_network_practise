@@ -10,9 +10,9 @@ namespace NeuralNetwork
     {
     static void Main(string[] args)
     {
-        var images = MnistProcessor.ImageDtos();
+        //var images = MnistProcessor.ImageDtos();
         // var inputImages = images.Select(NeuronInputImage.FromDigitImage).ToList();
-        // var net = new Network();
+         var net = new Network();
 
 
       
@@ -27,7 +27,7 @@ namespace NeuralNetwork
         neuralNet.Build();
         neuralNet.Train();
         neuralNet.Test();
-        // net.TrainTest(inputImages);
+        // net.TrainTest();
         //net.TrainMultiply();
         //net.Train(inputImages);
 
