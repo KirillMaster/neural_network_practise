@@ -15,7 +15,7 @@ namespace NeuralNetwork
         private const int InputsCount = 2;
         
         //neurons
-        private const int firstLayerNeuronsCount = 3;
+        private const int firstLayerNeuronsCount = 2;
         private const int secondLayerNeuronsCount = 1;
         
         private const int thirdLayerNeuronsCount = 1;

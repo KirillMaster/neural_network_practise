@@ -30,17 +30,17 @@ namespace NeuralNetwork
             Layers = new List<Layer>();
             var inputsCount = TrainData[0].X.Length;
             
-            var layer1 = new Layer(ActivationFunc, ActivationDerivative, 5, inputsCount, Lambda);
+            var layer1 = new Layer(ActivationFunc, ActivationDerivative, 3, inputsCount, Lambda);
             var layer2 = new Layer(ActivationFunc, ActivationDerivative, 1, layer1.NeuronsCount, Lambda);
-           // var layer3 = new Layer(ActivationFunc, ActivationDerivative, 1, layer2.NeuronsCount, Lambda);
+            //var layer3 = new Layer(ActivationFunc, ActivationDerivative, 1, layer2.NeuronsCount, Lambda);
 
             Layers.Add(layer1);
             Layers.Add(layer2);
-          //  Layers.Add(layer3);
-            TestCount = 2;
-            Lambda = 0.01;
+           // Layers.Add(layer3);
+            TestCount = 4;
+            Lambda = 0.1;
             Accuracy = 0.0001;
-            EpochCount = 10000;
+            EpochCount = 100000;
         }
 
         
@@ -123,6 +123,27 @@ namespace NeuralNetwork
                     X = new double[] {5, 5},
                     ExpectedY = new double[] {25}
                 },
+                new TrainData
+                {
+                    X = new double[] {3, 3},
+                    ExpectedY = new double[] {9}
+                },
+                // new TrainData
+                // {
+                //     X = new double[] {4, 5},
+                //     ExpectedY = new double[] {20}
+                // },
+                // new TrainData
+                // {
+                //     X = new double[] {3, 2},
+                //     ExpectedY = new double[] {6}
+                // },
+                // new TrainData
+                // {
+                //     X = new double[] {7, 8},
+                //     ExpectedY = new double[] {56}
+                // },
+                
             };
             return trainData;
         }
@@ -130,8 +151,8 @@ namespace NeuralNetwork
         public void SetTrainData()
         {
            // TrainData = GetMultiplyTableTrain();
-           //TrainData = GetXORTrain();
-           TrainData = GetTest();
+           TrainData = GetXORTrain();
+           //TrainData = GetTest();
         }
 
 
@@ -178,7 +199,7 @@ namespace NeuralNetwork
                 
                 var test = TrainData[num];
                 
-                if (TrainData.Count < 10 & i < TrainData.Count)
+                if (TrainData.Count < 10 &&  TrainData.Count >= TestCount)
                 {
                     test = TrainData[i];
                 }
@@ -234,10 +255,9 @@ namespace NeuralNetwork
 
         private double[] Forward(TrainData currentTrainPair)
         {
-            Layers[0].SetPreviousLayerOutputs(currentTrainPair.X);
-            var output = Layers[0].Forward();
-
-            for (int j = 1; j < Layers.Count; j++)
+            var output = currentTrainPair.X;
+            
+            for (int j = 0; j < Layers.Count; j++)
             {
                 Layers[j].SetPreviousLayerOutputs(output);
                 output = Layers[j].Forward();
@@ -262,18 +282,18 @@ namespace NeuralNetwork
         private static double ActivationFunc(double val)
         { 
             //return val;
-            return val >= 0 ? val : 0;
+            //return val >= 0 ? val : 0;
             //return (Math.Pow(Math.E, val) - Math.Pow(Math.E, -val)) / (Math.Pow(Math.E, val) + Math.Pow(Math.E, -val));
 
-            //return 1 / (1 + Math.Pow(Math.E, -val));
+            return 1 / (1 + Math.Pow(Math.E, -val));
         }
 
         //RELU'
         private static double ActivationDerivative(double val)
         {
-            return 1;
+            //return 1;
             //return  1 - val * val;
-            //return val * (1 - val);
+            return val * (1 - val);
         }
         
         private static double[] OutputDeltas(double[] outputNeurons, double[] expectedY)

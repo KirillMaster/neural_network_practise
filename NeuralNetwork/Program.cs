@@ -15,22 +15,29 @@ namespace NeuralNetwork
          var net = new Network();
 
 
-      
 
-        var lambda = 0.0001;
+
+
+
+         RunNet();
+        //net.TrainTest();
+        //net.TrainMultiply();
+        //net.Train(inputImages);
+
+    }
+
+    static void RunNet()
+    {
+        
+        var lambda = 0.1;
         var epochCount = 10000;
         var accuracy = 0.01;
         
-
         var neuralNet = new NeuralNet(lambda,epochCount, accuracy);
         neuralNet.SetTrainData();
         neuralNet.Build();
         neuralNet.Train();
         neuralNet.Test();
-        // net.TrainTest();
-        //net.TrainMultiply();
-        //net.Train(inputImages);
-
     }
 
 
