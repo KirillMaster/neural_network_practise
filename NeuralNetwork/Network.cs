@@ -15,10 +15,10 @@ namespace NeuralNetwork
         private const int InputsCount = 2;
         
         //neurons
-        private const int firstLayerNeuronsCount = 10;
-        private const int secondLayerNeuronsCount = 3;
+        private const int firstLayerNeuronsCount = 1;
+        private const int secondLayerNeuronsCount = 1;
         
-        private const int thirdLayerNeuronsCount = 2;
+        private const int thirdLayerNeuronsCount = 1;
         private const int fourthLayerNeuronsCount = 1;
 
 
@@ -103,7 +103,7 @@ namespace NeuralNetwork
 
             var rand = new Random();
             
-            for (var epoch = 0; epoch < 20000; epoch++)
+            for (var epoch = 0; epoch < 1000; epoch++)
             {
                 // foreach (var xorSample in xorSet.Take(2))
                 // {
@@ -417,7 +417,7 @@ namespace NeuralNetwork
             //return  1 - val * val;
             //return val * (1 - val);
         }
-        
+
 
         private static void Backward()
         {
@@ -472,7 +472,7 @@ namespace NeuralNetwork
             for (int i = 0; i < outputNeurons.Length; i++)
             {
                 //derivative of loss function
-                deltas[i] = 2 * (outputNeurons[i] - expectedY[i]) *ActivationDerivative(outputNeurons[i]);
+                deltas[i] = 2 * (outputNeurons[i] - expectedY[i]) * ActivationDerivative(outputNeurons[i]);
                             /*ActivationSoftMaxDerivative(outputNeurons[i],
                                 outputNeurons);*/ 
             }

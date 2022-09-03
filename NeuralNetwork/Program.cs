@@ -11,14 +11,31 @@ namespace NeuralNetwork
     static void Main(string[] args)
     {
         var images = MnistProcessor.ImageDtos();
-        var inputImages = images.Select(NeuronInputImage.FromDigitImage).ToList();
-        var net = new Network();
+        // var inputImages = images.Select(NeuronInputImage.FromDigitImage).ToList();
+        // var net = new Network();
 
 
+        var trainData = new List<TrainData>
+        {
+            new TrainData
+            {
+                X = new double[] {2, 2},
+                ExpectedY = new double[] {4}
+            },
+        };
+
+        var lambda = 0.0001;
+        var epochCount = 10000;
+        var accuracy = 0.01;
+        
+
+        var neuralNet = new NeuralNet(trainData, lambda,epochCount, accuracy);
+        neuralNet.Build();
+        neuralNet.Train();
         // net.TrainTest(inputImages);
-        net.TrainMultiply();
+        //net.TrainMultiply();
         //net.Train(inputImages);
-       
+
     }
 
 
