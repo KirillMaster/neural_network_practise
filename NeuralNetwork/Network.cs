@@ -173,21 +173,7 @@ namespace NeuralNetwork
             
         }
 
-        private class Sample
-        {
-            public double X1 { get; set; }
-            public double X2 { get; set; }
-            public double Y { get; set; }
-        }
-
-        private class NumberMultiplier
-        {
-            public NumberMultiplier()
-            {
-                Samples = new Sample[10];
-            }
-            public Sample[] Samples { get; set; }
-        }
+     
 
         private NumberMultiplier[] GetMultiplyTable()
         {

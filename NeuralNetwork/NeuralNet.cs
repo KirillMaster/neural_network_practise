@@ -31,36 +31,82 @@ namespace NeuralNetwork
             var inputsCount = TrainData[0].X.Length;
             
             var layer1 = new Layer(ActivationFunc, ActivationDerivative, 10, inputsCount, Lambda);
-            var layer2 = new Layer(ActivationFunc, ActivationDerivative, 5, layer1.NeuronsCount, Lambda);
-            var layer3 = new Layer(ActivationFunc, ActivationDerivative, 1, layer2.NeuronsCount, Lambda);
+            var layer2 = new Layer(ActivationFunc, ActivationDerivative, 1, layer1.NeuronsCount, Lambda);
+           // var layer3 = new Layer(ActivationFunc, ActivationDerivative, 1, layer2.NeuronsCount, Lambda);
 
             Layers.Add(layer1);
             Layers.Add(layer2);
-            Layers.Add(layer3);
+          //  Layers.Add(layer3);
             TestCount = 2;
-            Lambda = 0.001;
+            Lambda = 0.00001;
             Accuracy = 0.0001;
         }
 
         
+        private NumberMultiplier[] GetMultiplyTable()
+        {
+            var MultiplyTable = new NumberMultiplier[10];
+            
+            for (int i = 0; i < 10; i++)
+            {
+                var  numberMultiplier = new NumberMultiplier();
+                MultiplyTable[i] = numberMultiplier;
+
+                for (int j = 0; j < 10; j++)
+                {
+                    var sample = new Sample();
+                    numberMultiplier.Samples[j] = sample;
+                    sample.X1 = i + 1;
+                    sample.X2 = j + 1;
+                    sample.Y = sample.X1 * sample.X2;
+                }
+            }
+
+            return MultiplyTable;
+        }
+
+
+        private List<TrainData> GetMultiplyTableTrain()
+        {
+              
+            var table = GetMultiplyTable();
+            var trainData = new List<TrainData>();
+            foreach (var number in table)
+            {
+                foreach (var sample in number.Samples)
+                {
+                    trainData.Add(new TrainData
+                    {
+                        X = new double[]{sample.X1, sample.X2},
+                        ExpectedY = new double[]{sample.Y}
+                    });
+                }
+            }
+
+            return trainData;
+        }
+
+        private List<TrainData> GetXORTrain()
+        {
+            var xorSet = XORSet.Set();
+            var trainData = new List<TrainData>();
+            foreach (var xor in xorSet.Take(2))
+            {
+                trainData.Add(new TrainData
+                {
+                    X = xor.Input,
+                    ExpectedY = xor.Output
+                });
+            }
+
+            return trainData;
+        }
+        
+        
         public void SetTrainData()
         {
-            var trainData = new List<TrainData>
-            {
-                new TrainData
-                {
-                    X = new double[] {2, 2},
-                    ExpectedY = new double[] {4}
-                },
-                
-                new TrainData
-                {
-                    X = new double[] {3, 3},
-                    ExpectedY = new double[] {9}
-                },
-            };
-
-            TrainData = trainData;
+           // TrainData = GetMultiplyTableTrain();
+           TrainData = GetXORTrain();
         }
 
 
@@ -86,8 +132,11 @@ namespace NeuralNetwork
                 }
 
                 epochLoss = EpochLoss();
-                Console.WriteLine($"=====================");
-                PrintEpochLoss(epochLoss);
+                
+                //if (k % 100 == 0)
+               // {
+                    PrintEpochLoss(epochLoss);
+                //}
             }
             Console.WriteLine($"!=====================!");
             Console.WriteLine($"Final loss: {epochLoss}");
@@ -102,7 +151,7 @@ namespace NeuralNetwork
             {
                 var num = random.Next(0, TrainData.Count);
                 
-                var test = TrainData[i];
+                var test = TrainData[num];
                 
                 var output = Forward(test);
                 Console.WriteLine("=======TEST========");
