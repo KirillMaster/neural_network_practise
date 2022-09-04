@@ -27,7 +27,7 @@ namespace NeuralNetwork
 
         private double Gamma { get; set; }
 
-        private int BatchSize { get; set; } = 1;
+        private int BatchSize { get; set; } = 100;
 
         public NeuralNet(double lambda, double epochCount, double accuracy)
         {
@@ -36,7 +36,30 @@ namespace NeuralNetwork
             Accuracy = accuracy;
         }
 
+        public void Build()
+        {
+            var outputsCount = TrainBatches[0].ExpectedYs[0].Length;
+            Accuracy = 0.01;
+            TestCount = 10;
+            
+            Lambda = 0.007;
+            
+            Gamma = 0.9;
+            EpochCount = 100000;
+  
+            
+            LossFunction = new CrossEntropyLoss();
 
+            var layers = new List<Layer>()
+            {
+               // new Layer(new HyperbolicTanActivation(), 7),
+                new Layer(new ReluActivation(), 128),
+                new Layer(new SoftMaxActivation(), outputsCount)
+            };
+
+            CombineLayers(layers);
+        }
+        
         private double[][] Forward(Batch currentBatch)
         {
             var batchOutputs = new double[currentBatch.Size][];
@@ -91,30 +114,6 @@ namespace NeuralNetwork
             return deltas;
         }
 
-        public void Build()
-        {
-            var outputsCount = TrainBatches[0].ExpectedYs[0].Length;
-            Accuracy = 0.0001;
-            TestCount = 2;
-            
-            Lambda = 0.1;
-            
-            Gamma = 0.8;
-            EpochCount = 100000;
-  
-            
-            LossFunction = new MSELossFunction();
-
-            var layers = new List<Layer>()
-            {
-               // new Layer(new HyperbolicTanActivation(), 7),
-                new Layer(new SigmoidActivation(), 3),
-                new Layer(new SigmoidActivation(), outputsCount)
-            };
-
-            CombineLayers(layers);
-        }
-
         private void CombineLayers(List<Layer> layers)
         {
             if (layers.Count == 0)
@@ -158,6 +157,7 @@ namespace NeuralNetwork
                 k++;
 
                 TrainBatches.Shuffle();
+                TrainBatches.ForEach(x => x.TrainData.Shuffle());
                 
                 Errors = new List<double>();
                 for (int i = 0; i < TrainBatches.Count; i++)
@@ -172,7 +172,7 @@ namespace NeuralNetwork
 
                 epochLoss = EpochLoss();
 
-                if (k % 10 == 0)
+                if (k % 1 == 0)
                 {
                     //breakpoint
                     PrintEpochLoss(epochLoss);

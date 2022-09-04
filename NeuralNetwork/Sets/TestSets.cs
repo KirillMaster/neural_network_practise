@@ -81,11 +81,13 @@ namespace NeuralNetwork.Sets
 
 
             var trainData = new List<TrainData>();
-            inputImages.Shuffle();
+         
             foreach (var example in inputImages.Take(100))
             {
                 trainData.Add(new TrainData(example.NormalizedBytes, example.VectorizedLabel));
             }
+            
+            trainData.Shuffle();
 
             return Batch.GetBatches(batchSize, trainData);
         }
