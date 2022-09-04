@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Accord;
 using NeuralNetwork.ActivationFunctions;
 using NeuralNetwork.ImageProcessing;
 using NeuralNetwork.LossFunctions;
@@ -33,7 +34,7 @@ namespace NeuralNetwork
         
         private double[] Forward(TrainData currentTrainPair)
         {
-            var output = currentTrainPair.X;
+            var output = currentTrainPair.NormalizedX;
             
             for (int j = 0; j < Layers.Count; j++)
             {

@@ -10,26 +10,10 @@ namespace NeuralNetwork.Sets
         {
             var trainData = new List<TrainData>
             {
-                new TrainData
-                {
-                    X = new double[] {0, 0},
-                    ExpectedY = new double[] {0}
-                },
-                new TrainData
-                {
-                    X = new double[] {0, 1},
-                    ExpectedY = new double[] {1}
-                },
-                new TrainData
-                {
-                    X = new double[] {1, 0},
-                    ExpectedY = new double[] {1}
-                },
-                new TrainData
-                {
-                    X = new double[] {1, 1},
-                    ExpectedY = new double[] {1}
-                },
+                new TrainData(new double[] {0, 0}, new double[] {0}),
+                new TrainData(new double[] {0, 1}, new double[] {1}),
+                new TrainData(new double[] {1, 0}, new double[] {0}),
+                new TrainData(new double[] {1, 1}, new double[] {1}),
             };
             return trainData;
         }
@@ -66,11 +50,10 @@ namespace NeuralNetwork.Sets
             {
                 foreach (var sample in number.Samples)
                 {
-                    trainData.Add(new TrainData
-                    {
-                        X = new double[]{sample.X1, sample.X2},
-                        ExpectedY = new double[]{sample.Y/100.0}
-                    });
+                    trainData.Add(new TrainData(
+                        new double[] {sample.X1, sample.X2}, 
+                        new double[] {sample.Y / 100.0})
+                    );
                 }
             }
 
@@ -83,11 +66,7 @@ namespace NeuralNetwork.Sets
             var trainData = new List<TrainData>();
             foreach (var xor in xorSet)
             {
-                trainData.Add(new TrainData
-                {
-                    X = xor.Input,
-                    ExpectedY = xor.Output
-                });
+                trainData.Add(new TrainData(xor.Input, xor.Output));
             }
 
             return trainData;
@@ -103,11 +82,7 @@ namespace NeuralNetwork.Sets
             var trainData = new List<TrainData>();
             foreach (var example in inputImages.Take(2))
             {
-                trainData.Add(new TrainData
-                {
-                    X = example.NormalizedBytes,
-                    ExpectedY = example.VectorizedLabel
-                });
+                trainData.Add(new TrainData(example.NormalizedBytes, example.VectorizedLabel));
             }
 
             return trainData;
