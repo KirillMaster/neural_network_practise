@@ -47,10 +47,10 @@ namespace NeuralNetwork
                     result[i] += PreviousLayerOutputs[j] * w[j,i] + bias[i];
                 }
 
-                if (Double.IsNaN(result[i]))
-                {
-                    Console.WriteLine("Forward NAN catch");
-                };
+                // if (Double.IsNaN(result[i]))
+                // {
+                //     Console.WriteLine("Forward NAN catch");
+                // };
             }
 
        

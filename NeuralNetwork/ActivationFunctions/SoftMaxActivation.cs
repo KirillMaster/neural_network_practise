@@ -22,12 +22,12 @@ namespace NeuralNetwork.ActivationFunctions
             {
                 sum += Math.Pow(Math.E, allLayer[i]);
                 
-                var isNaN = Double.IsNaN(sum);
-
-                if (isNaN)
-                {
-                    Console.WriteLine($"NAN CATCH SoftMax: : {sum} Caused by: {allLayer[i]}");
-                }
+                // var isNaN = Double.IsNaN(sum);
+                //
+                // if (isNaN)
+                // {
+                //     Console.WriteLine($"NAN CATCH SoftMax: : {sum} Caused by: {allLayer[i]}");
+                // }
             }
             
            

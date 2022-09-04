@@ -36,14 +36,14 @@ namespace NeuralNetwork.LossFunctions
                 error += expectedY[i] * Math.Log(output) +
                          (1 - expectedY[i]) * Math.Log(1 - output);
                 
-                var isNaN = Double.IsNaN(error);
-
-                if (isNaN)
-                {
-                    Console.WriteLine($"NAN CATCH: Error: {error} ExpectedY: {expectedY[i]} Output: {outputNeurons[i]} ");
-                    Console.WriteLine($"Log Math.Log(outputNeurons[i]): {Math.Log(outputNeurons[i])}");
-                    Console.WriteLine($"Log Math.Log(1 - outputNeurons[i]) : {Math.Log(1 - outputNeurons[i])}");
-                }
+                // var isNaN = Double.IsNaN(error);
+                //
+                // if (isNaN)
+                // {
+                //     Console.WriteLine($"NAN CATCH: Error: {error} ExpectedY: {expectedY[i]} Output: {outputNeurons[i]} ");
+                //     Console.WriteLine($"Log Math.Log(outputNeurons[i]): {Math.Log(outputNeurons[i])}");
+                //     Console.WriteLine($"Log Math.Log(1 - outputNeurons[i]) : {Math.Log(1 - outputNeurons[i])}");
+                // }
             }
 
             var result = -(error / (double) outputNeurons.Length);
