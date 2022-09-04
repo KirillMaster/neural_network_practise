@@ -27,6 +27,11 @@ namespace NeuralNetwork.LossFunctions
                 {
                     output = 0.0001;
                 }
+
+                if (Math.Abs(output - 1) < 1.0E-10)
+                {
+                    output = 0.009;
+                }
                 
                 error += expectedY[i] * Math.Log(output) +
                          (1 - expectedY[i]) * Math.Log(1 - output);
@@ -50,6 +55,7 @@ namespace NeuralNetwork.LossFunctions
         
         private static double CrossEntropyLossDerivative(double output, double expected)
         {
+            return output - expected;
             if (Math.Abs(output - 1) < 1.0E-320 )
             {
                 output = 0.99999999999;
