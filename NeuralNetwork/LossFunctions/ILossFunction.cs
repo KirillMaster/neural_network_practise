@@ -2,7 +2,8 @@ namespace NeuralNetwork
 {
     public interface ILossFunction
     {
-        public double LossFunction(double[] outputNeurons, double[] expectedY);
-        public double LossFunctionDerivative(double output, double expectedY);
+        double LossFunction(double[][] batchOutputs, double[][] batchExpectedYs);
+        double SampleLossFunction(double[] batchOutput, double[] expectedY);
+        double LossFunctionDerivative(double output, double expectedY);
     }
 }

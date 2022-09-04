@@ -2,9 +2,9 @@ using System;
 
 namespace NeuralNetwork.LossFunctions
 {
-    public class MSELossFunction : ILossFunction
+    public class MSELossFunction : LossFunctionBase, ILossFunction
     {
-        public double LossFunction(double[] outputNeurons, double[] expectedY)
+        public override double SampleLossFunction(double[] outputNeurons, double[] expectedY)
         {
             return MSE(outputNeurons, expectedY);
         }

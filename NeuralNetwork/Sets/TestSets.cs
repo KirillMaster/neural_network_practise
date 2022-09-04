@@ -7,7 +7,7 @@ namespace NeuralNetwork.Sets
 {
     public class TestSets
     {
-        public static  List<TrainData> GetTest()
+        public static  List<Batch> GetTest(int batchSize)
         {
             var trainData = new List<TrainData>
             {
@@ -16,7 +16,7 @@ namespace NeuralNetwork.Sets
                 new TrainData(new double[] {1, 0.1}, new double[] {0}),
                 new TrainData(new double[] {1, 1}, new double[] {1}),
             };
-            return trainData;
+            return Batch.GetBatches(batchSize, trainData);
         }
         
         public static  NumberMultiplier[] GetMultiplyTable()
@@ -73,7 +73,7 @@ namespace NeuralNetwork.Sets
             return trainData;
         }
 
-        public static List<TrainData> ImagesTrain()
+        public static List<Batch> ImagesTrain(int batchSize)
         {
             var images = MnistProcessor.ImageDtos();
         
@@ -82,12 +82,12 @@ namespace NeuralNetwork.Sets
 
             var trainData = new List<TrainData>();
             inputImages.Shuffle();
-            foreach (var example in inputImages.Take(6))
+            foreach (var example in inputImages.Take(100))
             {
                 trainData.Add(new TrainData(example.NormalizedBytes, example.VectorizedLabel));
             }
 
-            return trainData;
+            return Batch.GetBatches(batchSize, trainData);
         }
     }
 }

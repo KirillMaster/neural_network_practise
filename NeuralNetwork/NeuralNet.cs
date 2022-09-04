@@ -13,7 +13,7 @@ namespace NeuralNetwork
     public class NeuralNet
     {
         private List<Layer> Layers { get; set; }
-        private List<TrainData> TrainData { get; set; }
+        private List<Batch> TrainBatches { get; set; }
         private double EpochCount { get; set; }
         
         private double Accuracy { get; set; }
@@ -27,15 +27,30 @@ namespace NeuralNetwork
 
         private double Gamma { get; set; }
 
+        private int BatchSize { get; set; } = 1;
+
         public NeuralNet(double lambda, double epochCount, double accuracy)
         {
             Lambda = lambda;
             EpochCount = epochCount;
             Accuracy = accuracy;
         }
+
+
+        private double[][] Forward(Batch currentBatch)
+        {
+            var batchOutputs = new double[currentBatch.Size][];
+            
+            for (int i = 0; i < currentBatch.Size; i++)
+            {
+                batchOutputs[i] = ForwardForOneSample(currentBatch.TrainData[i]);
+            }
+
+            return batchOutputs;
+        }
         
         
-        private double[] Forward(TrainData currentTrainPair)
+        private double[] ForwardForOneSample(TrainData currentTrainPair)
         {
             var output = currentTrainPair.NormalizedX;
             
@@ -48,9 +63,9 @@ namespace NeuralNetwork
             return output;
         }
 
-        private void Backward(double[] output, double[] expectedY)
+        private void Backward(double[][] batchOutputs, double[][] batchExpectedYs)
         {
-            var deltas = OutputDeltas(output, expectedY);
+            var deltas = OutputDeltas(batchOutputs, batchExpectedYs);
 
 
             for (int k = Layers.Count-1; k >= 0; k--)
@@ -60,12 +75,17 @@ namespace NeuralNetwork
             }
         }
         
-        private double[] OutputDeltas(double[] outputNeurons, double[] expectedY)
+        private double[] OutputDeltas(double[][] outputNeurons, double[][] expectedY)
         {
-            double[] deltas = new double[outputNeurons.Length];
-            for (int i = 0; i < outputNeurons.Length; i++)
+            double[] deltas = new double[BatchSize];
+            for (int i = 0; i < BatchSize; i++)
             {
-                deltas[i] = /*(1 - Gamma) **/ LossFunction.LossFunctionDerivative(outputNeurons[i], expectedY[i]) * Layers[Layers.Count-1].ActivationFuncDerivative(outputNeurons[i], outputNeurons);
+                for (int j = 0; j < outputNeurons[0].Length; j++)
+                {
+                    deltas[i] += 
+                        LossFunction.LossFunctionDerivative(outputNeurons[i][j], expectedY[i][j]) 
+                        * Layers[^1].ActivationFuncDerivative(outputNeurons[i][j], outputNeurons[i]);
+                }
             }
 
             return deltas;
@@ -73,22 +93,23 @@ namespace NeuralNetwork
 
         public void Build()
         {
-            var outputsCount = TrainData[0].ExpectedY.Length;
-            Accuracy = 0.05;
-            TestCount = 10;
+            var outputsCount = TrainBatches[0].ExpectedYs[0].Length;
+            Accuracy = 0.0001;
+            TestCount = 2;
             
-            Lambda = 0.001;
+            Lambda = 0.1;
             
-            Gamma = 0.9;
-            EpochCount = 1000;
+            Gamma = 0.8;
+            EpochCount = 100000;
+  
             
-            LossFunction = new CrossEntropyLoss();
+            LossFunction = new MSELossFunction();
 
             var layers = new List<Layer>()
             {
                // new Layer(new HyperbolicTanActivation(), 7),
-                new Layer(new ReluActivation(), 180),
-                new Layer(new SoftMaxActivation(), outputsCount)
+                new Layer(new SigmoidActivation(), 3),
+                new Layer(new SigmoidActivation(), outputsCount)
             };
 
             CombineLayers(layers);
@@ -101,7 +122,7 @@ namespace NeuralNetwork
                 return;
             }
             
-            var inputsCount = TrainData[0].X.Length;
+            var inputsCount = TrainBatches[0].TrainData[0].X.Length;
             var previousLayerOutputsCount = inputsCount;
             
             foreach (var layer in layers)
@@ -121,8 +142,8 @@ namespace NeuralNetwork
         {
             //TrainData = TestSets.GetMultiplyTableTrain();
            //TrainData = TestSets.GetXORTrain();
-           //TrainData = TestSets.GetTest();
-           TrainData = TestSets.ImagesTrain();
+           TrainBatches = TestSets.GetTest(BatchSize);
+           //TrainBatches = TestSets.ImagesTrain(BatchSize);
         }
 
 
@@ -136,30 +157,30 @@ namespace NeuralNetwork
             {
                 k++;
 
-                TrainData.Shuffle();
+                TrainBatches.Shuffle();
                 
                 Errors = new List<double>();
-                for (int i = 0; i < TrainData.Count; i++)
+                for (int i = 0; i < TrainBatches.Count; i++)
                 {
-                    var currentTrainPair = TrainData[i];
-                    var output = Forward(currentTrainPair);
+                    var currentTrainBatch = TrainBatches[i];
+                    var output = Forward(currentTrainBatch);
                     // PrintCase(currentTrainPair, output);
-                    Errors.Add(LossFunction.LossFunction(output, currentTrainPair.ExpectedY));
-                    Backward(output, currentTrainPair.ExpectedY);
+                    Errors.Add(LossFunction.LossFunction(output, currentTrainBatch.ExpectedYs));
+                    Backward(output, currentTrainBatch.ExpectedYs);
        
                 }
 
                 epochLoss = EpochLoss();
 
-                if (k % 1000 == 0)
+                if (k % 10 == 0)
                 {
                     //breakpoint
-                    var a = 1;
+                    PrintEpochLoss(epochLoss);
                 }
                 
                 //if (k % 100 == 0)
                // {
-                    PrintEpochLoss(epochLoss);
+                   // PrintEpochLoss(epochLoss);
                 //}
             }
             Console.WriteLine($"!=====================!");
@@ -173,20 +194,21 @@ namespace NeuralNetwork
             
             for (int i = 0; i < TestCount; i++)
             {
-                var num = random.Next(0, TrainData.Count);
+                var trainData = TrainBatches.SelectMany(x => x.TrainData).ToList();
+                var num = random.Next(0, trainData.Count);
                 
-                var test = TrainData[num];
+                var test = trainData[num];
                 
-                if (TrainData.Count < 10 &&  TrainData.Count >= TestCount)
+                if (trainData.Count < 10 &&  trainData.Count >= TestCount)
                 {
-                    test = TrainData[i];
+                    test = trainData[i];
                 }
                 
-                var output = Forward(test);
+                var output = Forward(new Batch(1, new List<TrainData>{test}));
                 Console.WriteLine("=======TEST========");
                 
-                PrintCase(test, output);
-                Console.WriteLine($"Sample Error: {LossFunction.LossFunction(output, test.ExpectedY)}");
+                PrintCase(test, output[0]);
+                Console.WriteLine($"Sample Error: {LossFunction.SampleLossFunction(output[0], test.ExpectedY)}");
             }
         }
 
