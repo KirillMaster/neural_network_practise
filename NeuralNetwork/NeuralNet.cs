@@ -79,7 +79,7 @@ namespace NeuralNetwork
             
             Lambda = 0.01;
             
-            Gamma = 0.9;
+            Gamma = 0.1;
             EpochCount = 1000;
             
             LossFunction = new CrossEntropyLoss();
