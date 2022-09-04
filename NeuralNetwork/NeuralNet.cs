@@ -75,9 +75,9 @@ namespace NeuralNetwork
         {
             var outputsCount = TrainData[0].ExpectedY.Length;
             Accuracy = 0.05;
-            TestCount = 5;
+            TestCount = 10;
             
-            Lambda = 0.001;
+            Lambda = 0.01;
             
             Gamma = 0.9;
             EpochCount = 1000;
@@ -218,7 +218,7 @@ namespace NeuralNetwork
                 sum += Errors[i];
             }
 
-            return sum;
+            return sum / Errors.Count;
         }
     }
 }
