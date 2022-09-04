@@ -77,22 +77,18 @@ namespace NeuralNetwork
             Accuracy = 0.01;
             TestCount = 2;
             
+            Lambda = 0.0001;
             
-       
-       
-            
-            Lambda = 1;
-            
-            Gamma = 0.1;
-            EpochCount = 10000;
+            Gamma = 0.9;
+            EpochCount = 100;
             
             LossFunction = new MSELossFunction();
 
             var layers = new List<Layer>()
             {
-                new Layer(new SigmoidActivation(), 6),
-               // new Layer(new ReluActivation(), 5),
-                new Layer(new SigmoidActivation(), outputsCount)
+               // new Layer(new HyperbolicTanActivation(), 7),
+                new Layer(new ReluActivation(), 180),
+                new Layer(new SoftMaxActivation(), outputsCount)
             };
 
             CombineLayers(layers);
@@ -124,9 +120,9 @@ namespace NeuralNetwork
         public void SetTrainData()
         {
             //TrainData = TestSets.GetMultiplyTableTrain();
-           TrainData = TestSets.GetXORTrain();
+           //TrainData = TestSets.GetXORTrain();
            //TrainData = TestSets.GetTest();
-           //TrainData = ImagesTrain();
+           TrainData = TestSets.ImagesTrain();
         }
 
 

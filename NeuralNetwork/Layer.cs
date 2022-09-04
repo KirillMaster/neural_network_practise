@@ -71,7 +71,7 @@ namespace NeuralNetwork
                 for (int j = 0; j < NeuronsCount; j++)
                 {
                     w[i,j] = w[i,j] - Lambda * lastLayerDeltas[j] * PreviousLayerOutputs[i];
-                  //  bias[j] = bias[j] - Lambda * lastLayerDeltas[j] * 1;
+                    bias[j] = bias[j] - Lambda * lastLayerDeltas[j] * 1;
                 } 
             }
         }
@@ -84,7 +84,7 @@ namespace NeuralNetwork
                 for (int j = 0; j < NeuronsCount; j++)
                 {
                     previousLayerDeltas[i] = 
-                        Gamma * previousLayerDeltas[i] +  (1 - Gamma) * outputDeltas[j] * w[i, j] * ActivationFuncDerivative(PreviousLayerOutputs[i], PreviousLayerOutputs);
+                        Gamma * previousLayerDeltas[i] +  (1 - Gamma) * outputDeltas[j] * (w[i, j] - Gamma * previousLayerDeltas[i]) * ActivationFuncDerivative(PreviousLayerOutputs[i], PreviousLayerOutputs);
                 }
             }
             
