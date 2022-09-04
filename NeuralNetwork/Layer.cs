@@ -111,7 +111,7 @@ namespace NeuralNetwork
         public void InitLayer()
         {
             w = RandomHelper.FillRandomly(PreviousLayerOutputsCount, NeuronsCount);
-            bias = RandomHelper.FillRandomly(NeuronsCount);
+            bias = RandomHelper.FillRandomly(NeuronsCount, 1.0);
         }
 
         public void SetLambda(double lambda)

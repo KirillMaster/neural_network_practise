@@ -12,13 +12,23 @@ namespace NeuralNetwork.Sets
             {
                 new TrainData
                 {
-                    X = new double[] {0.5, 2, 0.8},
-                    ExpectedY = new double[] {0, 1,0,0,0,0,0}
+                    X = new double[] {0, 0},
+                    ExpectedY = new double[] {0}
                 },
                 new TrainData
                 {
-                    X = new double[] {2, 0.7, 0.4},
-                    ExpectedY = new double[] {0.5, 0.1, 0,0,0,0,0.4}
+                    X = new double[] {0, 1},
+                    ExpectedY = new double[] {1}
+                },
+                new TrainData
+                {
+                    X = new double[] {1, 0},
+                    ExpectedY = new double[] {1}
+                },
+                new TrainData
+                {
+                    X = new double[] {1, 1},
+                    ExpectedY = new double[] {1}
                 },
             };
             return trainData;
