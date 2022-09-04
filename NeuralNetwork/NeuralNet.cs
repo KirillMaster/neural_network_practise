@@ -80,7 +80,7 @@ namespace NeuralNetwork
             Lambda = 0.0001;
             
             Gamma = 0.9;
-            EpochCount = 100;
+            EpochCount = 1000;
             
             LossFunction = new MSELossFunction();
 

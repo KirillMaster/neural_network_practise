@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Accord.Math;
 using NeuralNetwork.ImageProcessing;
 
 namespace NeuralNetwork.Sets
@@ -80,6 +81,7 @@ namespace NeuralNetwork.Sets
 
 
             var trainData = new List<TrainData>();
+            inputImages.Shuffle();
             foreach (var example in inputImages.Take(2))
             {
                 trainData.Add(new TrainData(example.NormalizedBytes, example.VectorizedLabel));
