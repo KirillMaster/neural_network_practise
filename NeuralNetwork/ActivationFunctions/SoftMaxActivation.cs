@@ -21,7 +21,16 @@ namespace NeuralNetwork.ActivationFunctions
             for (int i = 0; i < allLayer.Length; i++)
             {
                 sum += Math.Pow(Math.E, allLayer[i]);
+                
+                var isNaN = Double.IsNaN(sum);
+
+                if (isNaN)
+                {
+                    Console.WriteLine($"NAN CATCH SoftMax: : {sum} Caused by: {allLayer[i]}");
+                }
             }
+            
+           
     
             return Math.Pow(Math.E, val) / sum;
         }

@@ -77,12 +77,12 @@ namespace NeuralNetwork
             Lambda = 0.01;
             EpochCount = 10000;
             
-            LossFunction = new MSELossFunction();
+            LossFunction = new CrossEntropyLoss();
 
             var layers = new List<Layer>()
             {
-                new Layer(new SigmoidActivation(), 3),
-                new Layer(new SigmoidActivation(), outputsCount)
+                new Layer(new ReluActivation(), 2),
+                new Layer(new SoftMaxActivation(), outputsCount)
             };
 
             CombineLayers(layers);
