@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Accord;
+using Accord.Math;
 using NeuralNetwork.ActivationFunctions;
 using NeuralNetwork.ImageProcessing;
 using NeuralNetwork.LossFunctions;
@@ -23,6 +24,8 @@ namespace NeuralNetwork
         private int TestCount { get; set; }
         
         private ILossFunction LossFunction { get; set; }
+
+        private double Gamma { get; set; }
 
         public NeuralNet(double lambda, double epochCount, double accuracy)
         {
@@ -62,7 +65,7 @@ namespace NeuralNetwork
             double[] deltas = new double[outputNeurons.Length];
             for (int i = 0; i < outputNeurons.Length; i++)
             {
-                deltas[i] = LossFunction.LossFunctionDerivative(outputNeurons[i], expectedY[i]) * Layers[Layers.Count-1].ActivationFuncDerivative(outputNeurons[i], outputNeurons);
+                deltas[i] = /*(1 - Gamma) **/ LossFunction.LossFunctionDerivative(outputNeurons[i], expectedY[i]) * Layers[Layers.Count-1].ActivationFuncDerivative(outputNeurons[i], outputNeurons);
             }
 
             return deltas;
@@ -75,15 +78,20 @@ namespace NeuralNetwork
             TestCount = 2;
             
             
-            Lambda = 0.1;
-            EpochCount = 100000;
+       
+       
+            
+            Lambda = 1;
+            
+            Gamma = 0.1;
+            EpochCount = 10000;
             
             LossFunction = new MSELossFunction();
 
             var layers = new List<Layer>()
             {
-                new Layer(new SigmoidActivation(), 3),
-               // new Layer(new ReluActivation(), 1),
+                new Layer(new SigmoidActivation(), 6),
+               // new Layer(new ReluActivation(), 5),
                 new Layer(new SigmoidActivation(), outputsCount)
             };
 
@@ -104,6 +112,7 @@ namespace NeuralNetwork
             {
                 layer.SetPreviousLayerNeuronsCount(previousLayerOutputsCount);
                 layer.SetLambda(Lambda);
+                layer.SetGamma(Gamma);
                 layer.InitLayer();
                 previousLayerOutputsCount = layer.GetNeuronsCount();
             }
@@ -130,6 +139,8 @@ namespace NeuralNetwork
             while (k < EpochCount && epochLoss > Accuracy)
             {
                 k++;
+
+                TrainData.Shuffle();
                 
                 Errors = new List<double>();
                 for (int i = 0; i < TrainData.Count; i++)
@@ -143,6 +154,12 @@ namespace NeuralNetwork
                 }
 
                 epochLoss = EpochLoss();
+
+                if (k % 1000 == 0)
+                {
+                    //breakpoint
+                    var a = 1;
+                }
                 
                 //if (k % 100 == 0)
                // {
@@ -151,7 +168,7 @@ namespace NeuralNetwork
             }
             Console.WriteLine($"!=====================!");
             Console.WriteLine($"Final loss: {epochLoss}");
-            Console.WriteLine($"Epoch Count: {k + 1}");
+            Console.WriteLine($"Epoch Count: {k}");
         }
 
         public void Test()

@@ -10,9 +10,9 @@ namespace NeuralNetwork.Sets
         {
             var trainData = new List<TrainData>
             {
-                new TrainData(new double[] {0, 0}, new double[] {0}),
-                new TrainData(new double[] {0, 1}, new double[] {1}),
-                new TrainData(new double[] {1, 0}, new double[] {0}),
+                new TrainData(new double[] {0.1, 0.1}, new double[] {0}),
+                new TrainData(new double[] {0.1, 1}, new double[] {1}),
+                new TrainData(new double[] {1, 0.1}, new double[] {0}),
                 new TrainData(new double[] {1, 1}, new double[] {1}),
             };
             return trainData;

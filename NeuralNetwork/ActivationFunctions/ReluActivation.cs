@@ -14,7 +14,7 @@ namespace NeuralNetwork.ActivationFunctions
         
         public static double ActivationRelu(double val, double[] foo)
         {
-            return val;
+            return val > 0 ? val : 0;
         }
     
         public static double ActivationReluDerivative(double val, double[] foo)

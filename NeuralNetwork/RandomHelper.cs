@@ -13,20 +13,21 @@ namespace NeuralNetwork
             {
                 for (int j = 0; j < colCount; j++)
                 {
-                    source[i, j] = GetRandomWeight(random) + startingPoint;//(i + j) / 10.0;//GetRandomWeight(random);//(i + j) / 10.0;//GetRandomWeight(random);
+                    source[i, j] = GetRandomWeight(random); 
+                    // + startingPoint;//(i + j) / 10.0;//GetRandomWeight(random);//(i + j) / 10.0;//GetRandomWeight(random);
                 }
             }
 
             return source;
         }
 
-        public static double[] FillRandomly(int rowCount,double startingPoint = 0)
+        public static double[] FillRandomly(int rowCount, double startingPoint = 0)
         {
             var source = new double[rowCount];
             var random = new Random();
             for (int j = 0; j < rowCount; j++)
             {
-                source[j] = GetRandomWeight(random) + startingPoint;
+                source[j] = 0; GetRandomWeight(random); //+ startingPoint;
             }
 
             return source;
@@ -34,8 +35,8 @@ namespace NeuralNetwork
         
         public static double GetRandomWeight(Random random)
         {
-            //return random.NextDouble();
-            return (random.NextDouble() * (random.Next(0, 2) == 0 ? 1 : -1));
+            return random.NextDouble() / 10.0;
+            return (random.NextDouble() * (random.Next(0, 2) == 0 ? 1 : -1)) / 10.0;
         }
     }
 }

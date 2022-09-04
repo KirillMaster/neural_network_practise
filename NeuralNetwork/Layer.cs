@@ -17,6 +17,8 @@ namespace NeuralNetwork
         
         private double Lambda { get; set; }
         
+        private double Gamma { get; set; }
+        
         private double[,] w { get; set; } 
         private double[] bias { get; set; } 
 
@@ -69,7 +71,7 @@ namespace NeuralNetwork
                 for (int j = 0; j < NeuronsCount; j++)
                 {
                     w[i,j] = w[i,j] - Lambda * lastLayerDeltas[j] * PreviousLayerOutputs[i];
-                    bias[j] = bias[j] - Lambda * lastLayerDeltas[j] * 1;
+                  //  bias[j] = bias[j] - Lambda * lastLayerDeltas[j] * 1;
                 } 
             }
         }
@@ -81,7 +83,8 @@ namespace NeuralNetwork
             {
                 for (int j = 0; j < NeuronsCount; j++)
                 {
-                    previousLayerDeltas[i] += outputDeltas[j] * w[i, j] * ActivationFuncDerivative(PreviousLayerOutputs[i], PreviousLayerOutputs);
+                    previousLayerDeltas[i] = 
+                        Gamma * previousLayerDeltas[i] +  (1 - Gamma) * outputDeltas[j] * w[i, j] * ActivationFuncDerivative(PreviousLayerOutputs[i], PreviousLayerOutputs);
                 }
             }
             
@@ -117,6 +120,11 @@ namespace NeuralNetwork
         public void SetLambda(double lambda)
         {
             Lambda = lambda;
+        }
+
+        public void SetGamma(double gamma)
+        {
+            Gamma = gamma;
         }
     }
 }
