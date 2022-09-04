@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using NeuralNetwork.ActivationFunctions;
 using NeuralNetwork.ImageProcessing;
+using NeuralNetwork.LossFunctions;
 using NeuralNetwork.Sets;
 
 namespace NeuralNetwork
@@ -18,10 +20,11 @@ namespace NeuralNetwork
         private List<double> Errors { get; set; }
 
         private int TestCount { get; set; }
+        
+        private ILossFunction LossFunction { get; set; }
 
         public NeuralNet(double lambda, double epochCount, double accuracy)
         {
-            //TrainData = trainData;
             Lambda = lambda;
             EpochCount = epochCount;
             Accuracy = accuracy;
@@ -53,13 +56,12 @@ namespace NeuralNetwork
             }
         }
         
-        
         private double[] OutputDeltas(double[] outputNeurons, double[] expectedY)
         {
             double[] deltas = new double[outputNeurons.Length];
             for (int i = 0; i < outputNeurons.Length; i++)
             {
-                deltas[i] = LossFunctions.LossFuncDerivative(outputNeurons[i], expectedY[i]) * Layers[Layers.Count-1].ActivationFuncDerivative(outputNeurons[i], outputNeurons);
+                deltas[i] = LossFunction.LossFunctionDerivative(outputNeurons[i], expectedY[i]) * Layers[Layers.Count-1].ActivationFuncDerivative(outputNeurons[i], outputNeurons);
             }
 
             return deltas;
@@ -67,38 +69,25 @@ namespace NeuralNetwork
 
         public void Build()
         {
-            Layers = new List<Layer>();
-            var inputsCount = TrainData[0].X.Length;
             var outputsCount = TrainData[0].ExpectedY.Length;
             
             TestCount = 2;
-            Lambda = 0.1;
+            Lambda = 0.01;
             Accuracy = 0.0001;
-            EpochCount = 1000;
+            EpochCount = 100000;
+            
+            LossFunction = new MSELossFunction();
 
             var layers = new List<Layer>()
             {
-                new Layer(
-                    ActivationFunctions.ActivationSigmoid, 
-                    ActivationFunctions.ActivationSigmoidDerivative, 
-                    3,
-                    Lambda),
-                new Layer(
-                    ActivationFunctions.ActivationSigmoid, 
-                    ActivationFunctions.ActivationSigmoidDerivative,
-                    outputsCount,
-                    Lambda)
+                new Layer(new SigmoidActivation(), 3, Lambda),
+                new Layer(new SigmoidActivation(), outputsCount, Lambda)
             };
 
             CombineLayers(layers);
-
-            //Layers.Add(layer1);
-            //Layers.Add(layer2);
-            //Layers.Add(layer3);
-       
         }
 
-        public void CombineLayers(List<Layer> layers)
+        private void CombineLayers(List<Layer> layers)
         {
             if (layers.Count == 0)
             {
@@ -113,8 +102,9 @@ namespace NeuralNetwork
                 layer.SetPreviousLayerNeuronsCount(previousLayerOutputsCount);
                 layer.InitLayer();
                 previousLayerOutputsCount = layer.GetNeuronsCount();
-                Layers.Add(layer);
             }
+
+            Layers = layers;
         }
         
         
@@ -143,7 +133,7 @@ namespace NeuralNetwork
                     var currentTrainPair = TrainData[i];
                     var output = Forward(currentTrainPair);
                     // PrintCase(currentTrainPair, output);
-                    Errors.Add(LossFunctions.LossFunction(output, currentTrainPair.ExpectedY));
+                    Errors.Add(LossFunction.LossFunction(output, currentTrainPair.ExpectedY));
                     Backward(output, currentTrainPair.ExpectedY);
        
                 }
@@ -179,7 +169,7 @@ namespace NeuralNetwork
                 Console.WriteLine("=======TEST========");
                 
                 PrintCase(test, output);
-                Console.WriteLine($"Sample Error: {LossFunctions.LossFunction(output, test.ExpectedY)}");
+                Console.WriteLine($"Sample Error: {LossFunction.LossFunction(output, test.ExpectedY)}");
             }
         }
 

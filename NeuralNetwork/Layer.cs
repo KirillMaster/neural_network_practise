@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using NeuralNetwork.ActivationFunctions;
 
 namespace NeuralNetwork
 {
@@ -19,13 +20,13 @@ namespace NeuralNetwork
         private double[,] w { get; set; } 
         private double[] bias { get; set; } 
 
-        public Layer(Func<double, double[],double> activationFunc, Func<double, double[],double> activationFuncDerivative, int neuronsCount, double lambda)
+        public Layer(IActivationFunction activationFunc, int neuronsCount, double lambda)
         {
-            ActivationFunc = activationFunc;
+            ActivationFunc = activationFunc.Activation;
             NeuronsCount = neuronsCount;
             //PreviousLayerOutputsCount = previousLayerOutputsCount;
             Lambda = lambda;
-            ActivationFuncDerivative = activationFuncDerivative;
+            ActivationFuncDerivative = activationFunc.ActivationDerivative;
             
          
         }
