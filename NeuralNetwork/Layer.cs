@@ -20,12 +20,10 @@ namespace NeuralNetwork
         private double[,] w { get; set; } 
         private double[] bias { get; set; } 
 
-        public Layer(IActivationFunction activationFunc, int neuronsCount, double lambda)
+        public Layer(IActivationFunction activationFunc, int neuronsCount)
         {
             ActivationFunc = activationFunc.Activation;
-            NeuronsCount = neuronsCount;
-            //PreviousLayerOutputsCount = previousLayerOutputsCount;
-            Lambda = lambda;
+            NeuronsCount = neuronsCount; ;
             ActivationFuncDerivative = activationFunc.ActivationDerivative;
             
          
@@ -107,6 +105,11 @@ namespace NeuralNetwork
         {
             w = RandomHelper.FillRandomly(PreviousLayerOutputsCount, NeuronsCount);
             bias = RandomHelper.FillRandomly(NeuronsCount);
+        }
+
+        public void SetLambda(double lambda)
+        {
+            Lambda = lambda;
         }
     }
 }

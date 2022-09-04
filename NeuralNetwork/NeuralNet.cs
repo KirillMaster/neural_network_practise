@@ -70,18 +70,19 @@ namespace NeuralNetwork
         public void Build()
         {
             var outputsCount = TrainData[0].ExpectedY.Length;
+            Accuracy = 0.001;
+            TestCount = 1;
             
-            TestCount = 2;
+            
             Lambda = 0.01;
-            Accuracy = 0.0001;
-            EpochCount = 100000;
+            EpochCount = 10000;
             
             LossFunction = new MSELossFunction();
 
             var layers = new List<Layer>()
             {
-                new Layer(new SigmoidActivation(), 3, Lambda),
-                new Layer(new SigmoidActivation(), outputsCount, Lambda)
+                new Layer(new SigmoidActivation(), 3),
+                new Layer(new SigmoidActivation(), outputsCount)
             };
 
             CombineLayers(layers);
@@ -100,6 +101,7 @@ namespace NeuralNetwork
             foreach (var layer in layers)
             {
                 layer.SetPreviousLayerNeuronsCount(previousLayerOutputsCount);
+                layer.SetLambda(Lambda);
                 layer.InitLayer();
                 previousLayerOutputsCount = layer.GetNeuronsCount();
             }
