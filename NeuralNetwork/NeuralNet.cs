@@ -77,12 +77,12 @@ namespace NeuralNetwork
         
         private double[] OutputDeltas(double[][] outputNeurons, double[][] expectedY)
         {
-            double[] deltas = new double[BatchSize];
+            double[] deltas = new double[outputNeurons[0].Length];
             for (int i = 0; i < BatchSize; i++)
             {
                 for (int j = 0; j < outputNeurons[0].Length; j++)
                 {
-                    deltas[i] += 
+                    deltas[j] += 
                         LossFunction.LossFunctionDerivative(outputNeurons[i][j], expectedY[i][j]) 
                         * Layers[^1].ActivationFuncDerivative(outputNeurons[i][j], outputNeurons[i]);
                 }
@@ -142,8 +142,8 @@ namespace NeuralNetwork
         {
             //TrainData = TestSets.GetMultiplyTableTrain();
            //TrainData = TestSets.GetXORTrain();
-           TrainBatches = TestSets.GetTest(BatchSize);
-           //TrainBatches = TestSets.ImagesTrain(BatchSize);
+           //TrainBatches = TestSets.GetTest(BatchSize);
+           TrainBatches = TestSets.ImagesTrain(BatchSize);
         }
 
 
