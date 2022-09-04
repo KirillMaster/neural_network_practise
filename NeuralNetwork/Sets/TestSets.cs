@@ -82,7 +82,7 @@ namespace NeuralNetwork.Sets
 
             var trainData = new List<TrainData>();
             inputImages.Shuffle();
-            foreach (var example in inputImages.Take(3))
+            foreach (var example in inputImages.Take(4))
             {
                 trainData.Add(new TrainData(example.NormalizedBytes, example.VectorizedLabel));
             }

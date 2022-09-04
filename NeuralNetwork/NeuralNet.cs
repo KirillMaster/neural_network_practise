@@ -74,12 +74,12 @@ namespace NeuralNetwork
         public void Build()
         {
             var outputsCount = TrainData[0].ExpectedY.Length;
-            Accuracy = 0.1;
+            Accuracy = 0.05;
             TestCount = 5;
             
-            Lambda = 0.01;
+            Lambda = 0.001;
             
-            Gamma = 0.1;
+            Gamma = 0.9;
             EpochCount = 1000;
             
             LossFunction = new CrossEntropyLoss();
