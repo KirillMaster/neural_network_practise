@@ -34,7 +34,7 @@ namespace NeuralNetwork
         
         public static double GetRandomWeight(Random random)
         {
-            return random.NextDouble() * (random.Next(0, 1) == 0 ? 1 : -1);
+            return (random.NextDouble() * (random.Next(0, 2) == 0 ? 1 : -1));
         }
     }
 }

@@ -5,9 +5,9 @@ namespace NeuralNetwork
 {
     public class Layer
     {
-        private Func<double, double[], double> ActivationFunc { get; set; }
+        public Func<double, double[], double> ActivationFunc { get; set; }
         
-        private Func<double, double[],double> ActivationFuncDerivative { get; set; }
+        public Func<double, double[],double> ActivationFuncDerivative { get; set; }
         public int NeuronsCount { get; set; }
         private int PreviousLayerOutputsCount { get; set; }
         private double[] PreviousLayerOutputs { get; set; }
@@ -91,6 +91,16 @@ namespace NeuralNetwork
         public void SetNextLayerDeltas(double[] nextLayerDeltas)
         {
             NextLayerDeltas = nextLayerDeltas;
+        }
+
+        public void SetNeuronsCount(int neuronsCount)
+        {
+            NeuronsCount = neuronsCount;
+        }
+
+        public void SetPreviousLayerNeuronsCoutn(int previousLayerNeuronsCount)
+        {
+            PreviousLayerOutputsCount = previousLayerNeuronsCount;
         }
     }
 }

@@ -32,17 +32,23 @@ namespace NeuralNetwork
             var inputsCount = TrainData[0].X.Length;
             var outputsCount = TrainData[0].ExpectedY.Length;
             
-            var layer1 = new Layer(ActivationFunc, ActivationDerivative, 6, inputsCount, Lambda);
-            var layer2 = new Layer(ActivationFunc, ActivationDerivative, outputsCount, layer1.NeuronsCount, Lambda);
-            //var layer3 = new Layer(ActivationFunc, ActivationDerivative, 1, layer2.NeuronsCount, Lambda);
+            var layer1 = new Layer(ActivationFunctions.ActivationSigmoid, ActivationFunctions.ActivationSigmoidDerivative, 3, inputsCount, Lambda);
+            var layer2 = new Layer(ActivationFunctions.ActivationSigmoid, ActivationFunctions. ActivationSigmoidDerivative, outputsCount, layer1.NeuronsCount, Lambda);
+            //var layer3 = new Layer(ActivationSoftMax, ActivationSoftMaxDerivative, outputsCount, layer2.NeuronsCount, Lambda);
 
             Layers.Add(layer1);
             Layers.Add(layer2);
-           // Layers.Add(layer3);
-            TestCount = 10;
+            //Layers.Add(layer3);
+            TestCount = 2;
+            
             Lambda = 0.1;
-            Accuracy = 0.0025;
-            EpochCount = 10000;
+            Accuracy = 0.0001;
+            EpochCount = 1000;
+        }
+
+        public void CombineLayers()
+        {
+            
         }
 
         
@@ -112,13 +118,13 @@ namespace NeuralNetwork
             {
                 new TrainData
                 {
-                    X = new double[] {0.5, 2},
-                    ExpectedY = new double[] {0, 1}
+                    X = new double[] {0.5, 2, 0.8},
+                    ExpectedY = new double[] {0, 1,0,0,0,0,0}
                 },
                 new TrainData
                 {
-                    X = new double[] {2, 0.7},
-                    ExpectedY = new double[] {1, 0}
+                    X = new double[] {2, 0.7, 0.4},
+                    ExpectedY = new double[] {0.5, 0.1, 0,0,0,0,0.4}
                 },
                 // new TrainData
                 // {
@@ -158,7 +164,7 @@ namespace NeuralNetwork
 
 
             var trainData = new List<TrainData>();
-            foreach (var example in inputImages.Take(100))
+            foreach (var example in inputImages.Take(2))
             {
                 trainData.Add(new TrainData
                 {
@@ -195,7 +201,7 @@ namespace NeuralNetwork
                     var currentTrainPair = TrainData[i];
                     var output = Forward(currentTrainPair);
                     // PrintCase(currentTrainPair, output);
-                    Errors.Add(SampleError(output, currentTrainPair.ExpectedY));
+                    Errors.Add(LossFunctions.LossFunction(output, currentTrainPair.ExpectedY));
                     Backward(output, currentTrainPair.ExpectedY);
        
                 }
@@ -231,7 +237,7 @@ namespace NeuralNetwork
                 Console.WriteLine("=======TEST========");
                 
                 PrintCase(test, output);
-                Console.WriteLine($"Sample Error: {SampleError(output, test.ExpectedY)}");
+                Console.WriteLine($"Sample Error: {LossFunctions.LossFunction(output, test.ExpectedY)}");
             }
         }
 
@@ -241,7 +247,7 @@ namespace NeuralNetwork
             var result = string.Join(", ", output.Select(z => $"{z:f2}"));
             var expected = string.Join(", ", currentTrainPair.ExpectedY.Select(z => $"{z:f2}"));
             Console.WriteLine($"=====================");
-            Console.WriteLine($"Input: {input}");
+           // Console.WriteLine($"Input: {input}");
             Console.WriteLine($"Output: {result}");
             Console.WriteLine();
             Console.WriteLine($"Expected: {expected}");
@@ -252,16 +258,7 @@ namespace NeuralNetwork
             Console.WriteLine($"EpochLoss: {loss}");
         }
         
-        private static double SampleError(double[] outputNeurons, double[] expectedY)
-        {
-            double error = 0;
-            for (int i = 0; i < outputNeurons.Length; i++)
-            {
-                error += Math.Pow((outputNeurons[i] - expectedY[i]), 2);
-            }
-
-            return error;
-        }
+   
 
 
         private double EpochLoss()
@@ -300,50 +297,14 @@ namespace NeuralNetwork
                 deltas = Layers[k].Backward();
             }
         }
-
-        //RELU
-        private static double ActivationFunc(double val, double[] foo)
-        { 
-            //return val;
-            //return val >= 0 ? val : 0;
-            //return (Math.Pow(Math.E, val) - Math.Pow(Math.E, -val)) / (Math.Pow(Math.E, val) + Math.Pow(Math.E, -val));
-
-            return 1 / (1 + Math.Pow(Math.E, -val));
-        }
-
-        //RELU'
-        private static double ActivationDerivative(double val, double[] foo)
-        {
-            //return 1;
-            //return  1 - val * val;
-            return val * (1 - val);
-        }
-        
-        private static double ActivationSoftMax(double val, double[] allLayer)
-        {
-            double sum = 0; 
-            for (int i = 0; i < allLayer.Length; i++)
-            {
-                sum += Math.Pow(Math.E, allLayer[i]);
-            }
-
-            return Math.Pow(Math.E, val) / sum;
-        }
-
-        private static double ActivationSoftMaxDerivative(double val, double[] allLayer)
-        {
-            var softMax = ActivationSoftMax(val, allLayer);
-
-            return softMax * (1 - softMax);
-        }
         
         
-        private static double[] OutputDeltas(double[] outputNeurons, double[] expectedY)
+        private double[] OutputDeltas(double[] outputNeurons, double[] expectedY)
         {
             double[] deltas = new double[outputNeurons.Length];
             for (int i = 0; i < outputNeurons.Length; i++)
             {
-                deltas[i] = 2 * (outputNeurons[i] - expectedY[i]) * ActivationDerivative(outputNeurons[i], outputNeurons);
+                deltas[i] = LossFunctions.LossFuncDerivative(outputNeurons[i], expectedY[i]) * Layers[Layers.Count-1].ActivationFuncDerivative(outputNeurons[i], outputNeurons);
             }
 
             return deltas;
