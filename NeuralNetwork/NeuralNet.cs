@@ -75,20 +75,46 @@ namespace NeuralNetwork
             Lambda = 0.1;
             Accuracy = 0.0001;
             EpochCount = 1000;
-            
-            var layer1 = new Layer(ActivationFunctions.ActivationSigmoid, ActivationFunctions.ActivationSigmoidDerivative, 3, inputsCount, Lambda);
-            var layer2 = new Layer(ActivationFunctions.ActivationSigmoid, ActivationFunctions. ActivationSigmoidDerivative, outputsCount, layer1.NeuronsCount, Lambda);
-            //var layer3 = new Layer(ActivationSoftMax, ActivationSoftMaxDerivative, outputsCount, layer2.NeuronsCount, Lambda);
 
-            Layers.Add(layer1);
-            Layers.Add(layer2);
+            var layers = new List<Layer>()
+            {
+                new Layer(
+                    ActivationFunctions.ActivationSigmoid, 
+                    ActivationFunctions.ActivationSigmoidDerivative, 
+                    3,
+                    Lambda),
+                new Layer(
+                    ActivationFunctions.ActivationSigmoid, 
+                    ActivationFunctions.ActivationSigmoidDerivative,
+                    outputsCount,
+                    Lambda)
+            };
+
+            CombineLayers(layers);
+
+            //Layers.Add(layer1);
+            //Layers.Add(layer2);
             //Layers.Add(layer3);
        
         }
 
-        public void CombineLayers()
+        public void CombineLayers(List<Layer> layers)
         {
+            if (layers.Count == 0)
+            {
+                return;
+            }
             
+            var inputsCount = TrainData[0].X.Length;
+            var previousLayerOutputsCount = inputsCount;
+            
+            foreach (var layer in layers)
+            {
+                layer.SetPreviousLayerNeuronsCount(previousLayerOutputsCount);
+                layer.InitLayer();
+                previousLayerOutputsCount = layer.GetNeuronsCount();
+                Layers.Add(layer);
+            }
         }
         
         

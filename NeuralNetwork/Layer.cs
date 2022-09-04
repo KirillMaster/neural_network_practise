@@ -5,10 +5,10 @@ namespace NeuralNetwork
 {
     public class Layer
     {
-        public Func<double, double[], double> ActivationFunc { get; set; }
+        private Func<double, double[], double> ActivationFunc { get; set; }
         
         public Func<double, double[],double> ActivationFuncDerivative { get; set; }
-        public int NeuronsCount { get; set; }
+        private int NeuronsCount { get; set; }
         private int PreviousLayerOutputsCount { get; set; }
         private double[] PreviousLayerOutputs { get; set; }
         
@@ -19,16 +19,15 @@ namespace NeuralNetwork
         private double[,] w { get; set; } 
         private double[] bias { get; set; } 
 
-        public Layer(Func<double, double[],double> activationFunc, Func<double, double[],double> activationFuncDerivative, int neuronsCount, int previousLayerOutputsCount, double lambda)
+        public Layer(Func<double, double[],double> activationFunc, Func<double, double[],double> activationFuncDerivative, int neuronsCount, double lambda)
         {
             ActivationFunc = activationFunc;
             NeuronsCount = neuronsCount;
-            PreviousLayerOutputsCount = previousLayerOutputsCount;
+            //PreviousLayerOutputsCount = previousLayerOutputsCount;
             Lambda = lambda;
             ActivationFuncDerivative = activationFuncDerivative;
             
-            w = RandomHelper.FillRandomly(previousLayerOutputsCount, neuronsCount);
-            bias = RandomHelper.FillRandomly(neuronsCount);
+         
         }
 
         private double[] Activation(double[] outputs)
@@ -93,14 +92,20 @@ namespace NeuralNetwork
             NextLayerDeltas = nextLayerDeltas;
         }
 
-        public void SetNeuronsCount(int neuronsCount)
-        {
-            NeuronsCount = neuronsCount;
-        }
-
-        public void SetPreviousLayerNeuronsCoutn(int previousLayerNeuronsCount)
+        public void SetPreviousLayerNeuronsCount(int previousLayerNeuronsCount)
         {
             PreviousLayerOutputsCount = previousLayerNeuronsCount;
+        }
+
+        public int GetNeuronsCount()
+        {
+            return NeuronsCount;
+        }
+
+        public void InitLayer()
+        {
+            w = RandomHelper.FillRandomly(PreviousLayerOutputsCount, NeuronsCount);
+            bias = RandomHelper.FillRandomly(NeuronsCount);
         }
     }
 }
