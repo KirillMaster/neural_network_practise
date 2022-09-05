@@ -61,19 +61,20 @@ namespace NeuralNetwork
 
         public double[] Backward()
         {
-           ModifyWeights(NextLayerDeltas);
-           return Deltas(NextLayerDeltas);
+           GradientStep(NextLayerDeltas);
+           return LocalGradient(NextLayerDeltas);
         }
         
-        private void ModifyWeights(double[] lastLayerDeltas)
+        private void GradientStep(double[] lastLayerDeltas)
         {
             for (int i = 0; i < PreviousLayerOutputsCount; i++)
             {
+                var activationFuncDerivative = ActivationFuncDerivative(PreviousLayerOutputs[i], PreviousLayerOutputs);
                 for (int j = 0; j < NeuronsCount; j++)
                 {
-                    w[i,j] = w[i,j] - Lambda * lastLayerDeltas[j] * PreviousLayerOutputs[i];
+                    w[i,j] = w[i,j] - Lambda * lastLayerDeltas[j] * PreviousLayerOutputs[i] * activationFuncDerivative;
+                    bias[j] = bias[j] - Lambda * lastLayerDeltas[j] * 1 * activationFuncDerivative;
                     CheckNanAndThrow(w[i, j]);
-                    bias[j] = bias[j] - Lambda * lastLayerDeltas[j] * 1;
                 } 
             }
         }
@@ -87,14 +88,14 @@ namespace NeuralNetwork
             }
         }
         
-        private double[] Deltas(double[] outputDeltas)
+        private double[] LocalGradient(double[] outputDeltas)
         {
             double[] previousLayerDeltas = new double[PreviousLayerOutputsCount];
             for (int i = 0; i < PreviousLayerOutputsCount; i++)
             {
                 for (int j = 0; j < NeuronsCount; j++)
                 {
-                    previousLayerDeltas[i] +=  outputDeltas[j] * w[i, j] * ActivationFuncDerivative(PreviousLayerOutputs[i], PreviousLayerOutputs);
+                    previousLayerDeltas[i] +=  outputDeltas[j] * w[i, j];
                 }
             }
             
@@ -106,7 +107,7 @@ namespace NeuralNetwork
             PreviousLayerOutputs = previousLayerOutputs;
         }
 
-        public void SetNextLayerDeltas(double[] nextLayerDeltas)
+        public void SetNextLayerLocalGradient(double[] nextLayerDeltas)
         {
             NextLayerDeltas = nextLayerDeltas;
         }

@@ -10,13 +10,9 @@
         static void RunNet()
         {
             
-            var lambda = 0.1;
-            var epochCount = 10000;
-            var accuracy = 0.01;
-            
-            var neuralNet = new NeuralNet(lambda,epochCount, accuracy);
+            var neuralNet = new NeuralNet();
             neuralNet.SetTrainData();
-            neuralNet.Build();
+            neuralNet.BuildNet();
             neuralNet.Train();
             neuralNet.Test();
         }
