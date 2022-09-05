@@ -7,18 +7,12 @@ namespace NeuralNetwork
     public class Layer
     {
         private Func<double, double[], double> ActivationFunc { get; set; }
-        
         public Func<double, double[],double> ActivationFuncDerivative { get; set; }
         private int NeuronsCount { get; set; }
-        private int PreviousLayerOutputsCount { get; set; }
-        private double[] PreviousLayerOutputs { get; set; }
-        
+        private int PreviousLayerNeuronsCount { get; set; }
+        private double[] PreviousLayerNeurons { get; set; }
         private double[] NextLayerDeltas { get; set; }
-        
         private double Lambda { get; set; }
-        
-        private double Gamma { get; set; }
-        
         private double[,] w { get; set; } 
         private double[] bias { get; set; } 
 
@@ -27,8 +21,6 @@ namespace NeuralNetwork
             ActivationFunc = activationFunc.Activation;
             NeuronsCount = neuronsCount; ;
             ActivationFuncDerivative = activationFunc.ActivationDerivative;
-            
-         
         }
 
         private double[] Activation(double[] outputs)
@@ -42,21 +34,22 @@ namespace NeuralNetwork
 
             for (int i = 0; i < NeuronsCount; i++)
             {
-                for (int j = 0; j < PreviousLayerOutputsCount; j++)
+                for (int j = 0; j < PreviousLayerNeuronsCount; j++)
                 {
-                    result[i] += PreviousLayerOutputs[j] * w[j,i] + bias[i];
+                    result[i] += PreviousLayerNeurons[j] * w[j,i] + bias[i];
                 }
-                
-                if (Double.IsNaN(result[i]))
-                {
-                    Console.WriteLine("Forward NAN catch");
-                    throw new ApplicationException("Forward NAN");
-                };
+                ForwardIsNan(result[i]);
             }
-
-       
-
             return Activation(result);
+        }
+
+        private void ForwardIsNan(double result)
+        {
+            if (Double.IsNaN(result))
+            {
+                Console.WriteLine("Forward NAN catch");
+                throw new ApplicationException("Forward NAN");
+            }
         }
 
         public double[] Backward()
@@ -67,18 +60,17 @@ namespace NeuralNetwork
         
         private void GradientStep(double[] lastLayerDeltas)
         {
-            for (int i = 0; i < PreviousLayerOutputsCount; i++)
+            for (int i = 0; i < PreviousLayerNeuronsCount; i++)
             {
-                var activationFuncDerivative = ActivationFuncDerivative(PreviousLayerOutputs[i], PreviousLayerOutputs);
+                var activationFuncDerivative = ActivationFuncDerivative(PreviousLayerNeurons[i], PreviousLayerNeurons);
                 for (int j = 0; j < NeuronsCount; j++)
                 {
-                    w[i,j] = w[i,j] - Lambda * lastLayerDeltas[j] * PreviousLayerOutputs[i] * activationFuncDerivative;
+                    w[i,j] = w[i,j] - Lambda * lastLayerDeltas[j] * PreviousLayerNeurons[i] * activationFuncDerivative;
                     bias[j] = bias[j] - Lambda * lastLayerDeltas[j] * 1 * activationFuncDerivative;
                     CheckNanAndThrow(w[i, j]);
                 } 
             }
         }
-
 
         private void CheckNanAndThrow(double val)
         {
@@ -90,8 +82,8 @@ namespace NeuralNetwork
         
         private double[] LocalGradient(double[] outputDeltas)
         {
-            double[] previousLayerDeltas = new double[PreviousLayerOutputsCount];
-            for (int i = 0; i < PreviousLayerOutputsCount; i++)
+            double[] previousLayerDeltas = new double[PreviousLayerNeuronsCount];
+            for (int i = 0; i < PreviousLayerNeuronsCount; i++)
             {
                 for (int j = 0; j < NeuronsCount; j++)
                 {
@@ -102,9 +94,9 @@ namespace NeuralNetwork
             return previousLayerDeltas;
         }
         
-        public void SetPreviousLayerOutputs(double[] previousLayerOutputs)
+        public void SetPreviousLayerOutputs(double[] previousLayerNeurons)
         {
-            PreviousLayerOutputs = previousLayerOutputs;
+            PreviousLayerNeurons = previousLayerNeurons;
         }
 
         public void SetNextLayerLocalGradient(double[] nextLayerDeltas)
@@ -114,7 +106,7 @@ namespace NeuralNetwork
 
         public void SetPreviousLayerNeuronsCount(int previousLayerNeuronsCount)
         {
-            PreviousLayerOutputsCount = previousLayerNeuronsCount;
+            PreviousLayerNeuronsCount = previousLayerNeuronsCount;
         }
 
         public int GetNeuronsCount()
@@ -124,18 +116,13 @@ namespace NeuralNetwork
 
         public void InitLayer()
         {
-            w = RandomHelper.FillRandomly(PreviousLayerOutputsCount, NeuronsCount);
+            w = RandomHelper.FillRandomly(PreviousLayerNeuronsCount, NeuronsCount);
             bias = RandomHelper.FillRandomly(NeuronsCount, 1.0);
         }
 
         public void SetLambda(double lambda)
         {
             Lambda = lambda;
-        }
-
-        public void SetGamma(double gamma)
-        {
-            Gamma = gamma;
         }
     }
 }

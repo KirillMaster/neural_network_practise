@@ -15,7 +15,7 @@ namespace NeuralNetwork
         private int BatchSize { get; set; } = 1;
         private double EpochCount { get; set; } = 1000;
         private double Accuracy { get; set; } = 80;
-        private double Lambda { get; set; } = 0.01;
+        private double Lambda { get; set; } = 0.0001;
         private int TestCount { get; set; } = 4;
         private List<double> Errors { get; set; }
         private int InputsCount { get; set; }
@@ -172,7 +172,6 @@ namespace NeuralNetwork
             {
                 TrainBatches.Shuffle();
                 TrainBatches.ForEach(x => x.TrainDatas.Shuffle());
-                
                 Errors = new List<double>();
                 
                 for (int i = 0; i < TrainBatches.Count; i++)
@@ -182,6 +181,10 @@ namespace NeuralNetwork
                     Errors.Add(LossFunction.LossFunction(output, currentTrainBatch.ExpectedYs));
                     Backward(output, currentTrainBatch.ExpectedYs);
                 }
+
+                epochAccuracy = ImagesNetAccuracy(
+                    TrainBatches.SelectMany(x => x.TrainDatas.Take(3))
+                        .ToList());
 
                 Print(epochAccuracy, PrintHelper.EpochLoss(Errors.ToArray()), k);
                 k++;
@@ -193,10 +196,6 @@ namespace NeuralNetwork
 
         private void Print(double epochAccuracy, double epochLoss, int iteration)
         {
-            epochAccuracy = ImagesNetAccuracy(
-                TrainBatches.SelectMany(x => x.TrainDatas.Take(3))
-                    .ToList());
-
             if (iteration % 1 == 0)
             {
                 PrintHelper.PrintEpochAccuracy(epochAccuracy);
