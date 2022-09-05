@@ -50,5 +50,10 @@ namespace NeuralNetwork
                 Value = labelVal
             };
         }
+
+        public static int NormalizedToValue(double[] vectorizedLabel)
+        {
+            return vectorizedLabel.ToList().IndexOf(vectorizedLabel.Max()); 
+        }
     }
 }

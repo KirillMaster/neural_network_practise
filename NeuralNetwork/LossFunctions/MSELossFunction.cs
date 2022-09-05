@@ -27,7 +27,8 @@ namespace NeuralNetwork.LossFunctions
         
         private static double MSEDerivative(double output, double expected)
         {
-            return 2 * (output- expected);
+            return (expected - output);
+            //return 2 * (output- expected);
         }
     }
 }

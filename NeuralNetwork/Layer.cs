@@ -72,8 +72,18 @@ namespace NeuralNetwork
                 for (int j = 0; j < NeuronsCount; j++)
                 {
                     w[i,j] = w[i,j] - Lambda * lastLayerDeltas[j] * PreviousLayerOutputs[i];
+                    CheckNanAndThrow(w[i, j]);
                     bias[j] = bias[j] - Lambda * lastLayerDeltas[j] * 1;
                 } 
+            }
+        }
+
+
+        private void CheckNanAndThrow(double val)
+        {
+            if (Double.IsNaN(val))
+            {
+                throw new ApplicationException("Weight is NAN");
             }
         }
         
@@ -84,8 +94,7 @@ namespace NeuralNetwork
             {
                 for (int j = 0; j < NeuronsCount; j++)
                 {
-                    previousLayerDeltas[i] = 
-                        Gamma * previousLayerDeltas[i] +  (1 - Gamma) * outputDeltas[j] * (w[i, j] - Gamma * previousLayerDeltas[i]) * ActivationFuncDerivative(PreviousLayerOutputs[i], PreviousLayerOutputs);
+                    previousLayerDeltas[i] +=  outputDeltas[j] * w[i, j] * ActivationFuncDerivative(PreviousLayerOutputs[i], PreviousLayerOutputs);
                 }
             }
             

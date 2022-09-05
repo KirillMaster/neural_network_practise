@@ -17,10 +17,22 @@ namespace NeuralNetwork.ActivationFunctions
         private static double ActivationSoftMax(double val, double[] allLayer)
         {
                 
-            double sum = 0; 
+            double sum = 0;
+            if (val < 1.0E-20)
+            {
+                val = 0.01;
+            }
+            
             for (int i = 0; i < allLayer.Length; i++)
             {
-                sum += Math.Pow(Math.E, allLayer[i]);
+
+                if (allLayer[i] < 1.0E-20)
+                {
+                    allLayer[i] = 0.01;
+                }
+                
+                var exp = Math.Pow(Math.E, allLayer[i]);
+                sum += exp;
                 
                 // var isNaN = Double.IsNaN(sum);
                 //

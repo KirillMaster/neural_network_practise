@@ -6,14 +6,14 @@ namespace NeuralNetwork
     public class Batch
     {
         public int Size { get; set; }
-        public List<TrainData> TrainData { get; set; }
+        public List<TrainData> TrainDatas { get; set; }
         public double[][] ExpectedYs { get; set; }
         
-        public Batch(int size, List<TrainData> data)
+        public Batch(int size, List<TrainData> datas)
         {
             Size = size;
-            TrainData = data;
-            ExpectedYs = data.Select(x => x.ExpectedY.ToArray()).ToArray();
+            TrainDatas = datas;
+            ExpectedYs = datas.Select(x => x.ExpectedY.ToArray()).ToArray();
         }
 
         public static List<Batch> GetBatches(int size, List<TrainData> allTrainingData)

@@ -58,12 +58,12 @@ namespace NeuralNetwork.LossFunctions
             return output - expected;
             if (Math.Abs(output - 1) < 1.0E-320 )
             {
-                output = 0.99999999999;
+                output = 0.99;
             }
 
             if (Math.Abs(output) < 1.0E-320)
             {
-                output = 0.000000000001;
+                output = 0.001;
             }
             
             return -(expected / output - (1 - expected) / (1 - output));
